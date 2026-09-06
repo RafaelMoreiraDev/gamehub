@@ -496,9 +496,10 @@ const gamesDatabase = [
         icon: "⚽",
         rating: 4.5,
         plays: 18750,
-        badge: "popular",
-        description: "Torne-se uma estrela do futebol mundial.",
+        badge: "new",
+        description: "Copa dos Pênaltis! Mire, dê o efeito e vença goleiros cada vez melhores.",
         color: "#22c55e",
+        gameFile: "games/football.html",
         thumbnail: generateSoccerThumb
     },
     {
@@ -534,9 +535,10 @@ const gamesDatabase = [
         icon: "💎",
         rating: 4.6,
         plays: 9800,
-        badge: null,
-        description: "Explore minas e colete cristais preciosos.",
+        badge: "new",
+        description: "Campo minado de cristais! Bandeiras, números e recorde de tempo.",
         color: "#06b6d4",
+        gameFile: "games/mines.html",
         thumbnail: generateCrystalThumb
     },
     {
