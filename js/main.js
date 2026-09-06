@@ -472,8 +472,9 @@ const gamesDatabase = [
         rating: 4.9,
         plays: 8920,
         badge: "top",
-        description: "Desafie seu cérebro com puzzles cada vez mais difíceis.",
+        description: "Quebra-cabeça deslizante com arte neon e recorde de movimentos.",
         color: "#ffe66d",
+        gameFile: "games/sliding-puzzle.html",
         thumbnail: generatePuzzleThumb
     },
     {
@@ -620,9 +621,10 @@ const gamesDatabase = [
         icon: "🎯",
         rating: 4.4,
         plays: 6500,
-        badge: null,
-        description: "Resolva puzzles coloridos contra o tempo.",
+        badge: "new",
+        description: "Encaixe blocos, complete linhas e faça combos infinitos!",
         color: "#e11d48",
+        gameFile: "games/block-puzzle.html",
         thumbnail: generatePuzzleManiaThumb
     },
     {
