@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campeão de Tênis - GameHub</title>
+    <meta name="description" content="Jogue Campeão de Tênis online grátis! Tênis arcade com efeito, placar real e IA competitiva. Melhor de 3 games, sem download!">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%8E%AE</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Roboto', sans-serif;
+            color: white;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .game-header {
+            position: relative;
+            padding-left: 100px;
+            padding-right: 100px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .back-home {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.1);
+            color: #a0a0a0;
+            padding: 7px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .back-home:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.7rem;
+            background: linear-gradient(90deg, #84cc16, #a3e635, #fde047);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+            animation: glow 2.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 5px rgba(132,204,22,0.6)); }
+            to { filter: drop-shadow(0 0 22px rgba(163,230,53,0.8)); }
+        }
+
+        .game-subtitle {
+            color: #a0a0c0;
+            font-size: 0.85rem;
+        }
+
+        .game-container {
+            background: rgba(0,0,0,0.5);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 0 50px rgba(132,204,22,0.2), inset 0 0 30px rgba(0,0,0,0.4);
+            max-width: 780px;
+            width: 100%;
+            position: relative;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .stat-item { text-align: center; }
+
+        .stat-label {
+            font-size: 0.55rem;
+            color: #a0a0c0;
+            margin-bottom: 6px;
+        }
+
+        .stat-value { font-size: 1rem; color: #a3e635; }
+        .stat-value.opp { color: #f87171; }
+        .stat-value.best { color: #4ecdc4; font-size: 0.8rem; }
+
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .diff-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            padding: 10px 14px;
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            color: #a0a0c0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .diff-btn:hover { border-color: #a3e635; color: white; }
+
+        .diff-btn.easy.active { border-color: #22c55e; background: rgba(34,197,94,0.2); color: #86efac; }
+        .diff-btn.medium.active { border-color: #fbbf24; background: rgba(251,191,36,0.2); color: #fde68a; }
+        .diff-btn.hard.active { border-color: #ef4444; background: rgba(239,68,68,0.2); color: #fca5a5; }
+
+        .canvas-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        #gameCanvas {
+            border-radius: 12px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
+            max-width: 100%;
+            touch-action: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.65rem;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover { transform: translateY(-2px); filter: brightness(1.15); }
+
+        .btn-start { background: linear-gradient(135deg, #84cc16, #4d7c0f); }
+        .btn-music { background: linear-gradient(135deg, #64c8ff, #3b82f6); }
+
+        .instructions {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .instructions h3 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            color: #a3e635;
+            margin-bottom: 8px;
+        }
+
+        .instructions p {
+            color: #a0a0c0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .banner {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.6rem;
+            text-align: center;
+            z-index: 20;
+            pointer-events: none;
+            text-shadow: 0 0 30px rgba(163,230,53,0.9);
+            transition: transform 0.25s cubic-bezier(0.2, 1.8, 0.4, 1);
+            line-height: 1.5;
+        }
+
+        .banner.show { transform: translate(-50%, -50%) scale(1); }
+        .banner.ponto { color: #a3e635; }
+        .banner.erro { color: #f87171; }
+        .banner.game { color: #fde047; }
+
+        .end-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5,3,15,0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .end-overlay.show { opacity: 1; pointer-events: all; }
+
+        .end-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.7rem;
+            background: linear-gradient(90deg, #84cc16, #fde047);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 14px;
+        }
+
+        .end-sub {
+            color: #c4b5fd;
+            font-size: 1rem;
+            margin-bottom: 24px;
+            text-align: center;
+            line-height: 1.7;
+        }
+
+        .end-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.75rem;
+            padding: 14px 26px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #84cc16, #a3e635);
+            color: #1a1a2e;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .end-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(163,230,53,0.5); }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <a href="../index.html" class="back-home" title="Voltar ao GameHub">🏠 Início</a>
+        <h1 class="game-title">CAMPEÃO DE TÊNIS</h1>
+        <p class="game-subtitle">Efeito, placar real e IA raivosa — melhor de 3 games! 🎾</p>
+    </div>
+
+    <div class="game-container">
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-label">GAMES (VOCÊ)</div>
+                <div class="stat-value" id="pGames">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">PONTOS</div>
+                <div class="stat-value" id="pPoints">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">PONTOS (IA)</div>
+                <div class="stat-value opp" id="oPoints">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">GAMES (IA)</div>
+                <div class="stat-value opp" id="oGames">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">PTS RECORDE</div>
+                <div class="stat-value best" id="bestStat">0</div>
+            </div>
+        </div>
+
+        <div class="difficulty-selector">
+            <button class="diff-btn easy active" onclick="setDifficulty('easy')">FÁCIL</button>
+            <button class="diff-btn medium" onclick="setDifficulty('medium')">MÉDIO</button>
+            <button class="diff-btn hard" onclick="setDifficulty('hard')">DIFÍCIL</button>
+        </div>
+
+        <div class="canvas-wrap">
+            <canvas id="gameCanvas" width="720" height="460"></canvas>
+            <div class="banner" id="banner"></div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn btn-start" onclick="startGame()">JOGAR</button>
+            <button class="control-btn btn-music" id="musicBtn" onclick="toggleMusic()">🔊 MÚSICA</button>
+        </div>
+
+        <div class="instructions">
+            <h3>COMO JOGAR</h3>
+            <p>Mova a raquete com o <b>mouse</b>. Quando a bola chegar, ela rebate sozinha — a <b>direção do seu movimento</b> dá o efeito! Vence o game quem faz 4 pontos (com 2 de vantagem). Ganha a partida quem fizer <b>2 games</b>!</p>
+        </div>
+    </div>
+
+    <div class="end-overlay" id="endOverlay">
+        <div class="end-title" id="endTitle">VITÓRIA!</div>
+        <div class="end-sub" id="endSub"></div>
+        <button class="end-btn" onclick="startGame()">JOGAR DE NOVO</button>
+    </div>
+
+    <script>
+    const AC = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let musicPlaying = false;
+    let musicTimer = null;
+
+    function ensureAudio() {
+        if (!audioCtx) audioCtx = new AC();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function tone(freq, dur, type = 'sine', vol = 0.15, when = 0) {
+        if (!audioCtx) return;
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = type;
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(vol, audioCtx.currentTime + when);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + when + dur);
+        o.connect(g);
+        g.connect(audioCtx.destination);
+        o.start(audioCtx.currentTime + when);
+        o.stop(audioCtx.currentTime + when + dur);
+    }
+
+    function noiseBurst(dur, vol) {
+        if (!audioCtx) return;
+        const len = audioCtx.sampleRate * dur;
+        const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+        const src = audioCtx.createBufferSource();
+        const g = audioCtx.createGain();
+        g.gain.value = vol;
+        src.buffer = buf;
+        src.connect(g); g.connect(audioCtx.destination);
+        src.start();
+    }
+
+    function playSound(kind) {
+        ensureAudio();
+        if (kind === 'hit') { noiseBurst(0.06, 0.2); tone(320, 0.06, 'triangle', 0.12); }
+        else if (kind === 'point') { [523, 659, 784].forEach((f, i) => tone(f, 0.18, 'square', 0.1, i * 0.09)); }
+        else if (kind === 'lose') { tone(200, 0.25, 'sawtooth', 0.1); }
+        else if (kind === 'game') {
+            noiseBurst(0.8, 0.1);
+            [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, 'square', 0.1, i * 0.12));
+        } else if (kind === 'net') tone(180, 0.1, 'sawtooth', 0.08);
+        else if (kind === 'start') { [392, 523, 659].forEach((f, i) => tone(f, 0.15, 'square', 0.08, i * 0.08)); }
+    }
+
+    function startMusicLoop() {
+        stopMusicLoop();
+        const scale = [220, 277.18, 329.63, 415.3, 440];
+        let step = 0;
+        musicTimer = setInterval(() => {
+            if (!musicPlaying || !audioCtx) return;
+            const f = scale[step % scale.length];
+            tone(f, 0.45, 'triangle', 0.033);
+            if (step % 4 === 0) tone(f / 2, 0.85, 'sine', 0.03);
+            step++;
+        }, 380);
+    }
+
+    function stopMusicLoop() { if (musicTimer) { clearInterval(musicTimer); musicTimer = null; } }
+
+    function toggleMusic() {
+        ensureAudio();
+        musicPlaying = !musicPlaying;
+        const btn = document.getElementById('musicBtn');
+        btn.textContent = musicPlaying ? '🔊 MÚSICA' : '🔇 MUDO';
+        btn.style.filter = musicPlaying ? 'brightness(1.1)' : 'brightness(0.6)';
+        if (musicPlaying) startMusicLoop(); else stopMusicLoop();
+    }
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    const COURT = { x: 90, y: 40, w: W - 180, h: H - 80 };
+    const NET_Y = H / 2;
+
+    const DIFF = {
+        easy:   { aiSpeed: 4.2, aiErr: 70, aiPower: 6.5 },
+        medium: { aiSpeed: 6,   aiErr: 40, aiPower: 7.5 },
+        hard:   { aiSpeed: 8,   aiErr: 16, aiPower: 8.6 }
+    };
+
+    let diff = 'easy';
+    let state = 'idle';
+    let serving = 'player';
+    let servingCountdown = 0;
+    let hitCooldown = 0;
+
+    let pScore = { points: 0, games: 0 };
+    let oScore = { points: 0, games: 0 };
+    let totalPoints = 0;
+    let best = 0;
+    let displayP = '0', displayO = '0';
+
+    let mouse = { x: W / 2, y: H - 70, prevX: W / 2 };
+    let player = { x: W / 2, y: H - 70, w: 64, h: 12, vx: 0 };
+    let opp = { x: W / 2, y: 70, w: 64, h: 12 };
+    let ball = null;
+    let trail = [];
+    let particles = [];
+
+    function loadBest() {
+        best = parseInt(localStorage.getItem('tennis_best_pts') || '0');
+        document.getElementById('bestStat').textContent = best;
+    }
+
+    function setDifficulty(d) {
+        diff = d;
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.diff-btn.' + d).classList.add('active');
+        startGame();
+    }
+
+    function pointLabel(n, other) {
+        const labels = ['0', '15', '30', '40'];
+        if (n <= 3) return labels[n];
+        if (n > other) return 'VANT.';
+        if (n === other) return '40';
+        return '40';
+    }
+
+    function updateScoreUI() {
+        displayP = pointLabel(pScore.points, oScore.points);
+        displayO = pointLabel(oScore.points, pScore.points);
+        document.getElementById('pPoints').textContent = displayP;
+        document.getElementById('oPoints').textContent = displayO;
+        document.getElementById('pGames').textContent = pScore.games;
+        document.getElementById('oGames').textContent = oScore.games;
+    }
+
+    function startGame() {
+        pScore = { points: 0, games: 0 };
+        oScore = { points: 0, games: 0 };
+        totalPoints = 0;
+        loadBest();
+        updateScoreUI();
+        state = 'play';
+        serving = 'player';
+        servingCountdown = 60;
+        ball = null;
+        document.getElementById('endOverlay').classList.remove('show');
+        playSound('start');
+    }
+
+    function spawnBall() {
+        const sx = W / 2 + (Math.random() - 0.5) * 120;
+        const sy = serving === 'player' ? H - 90 : 90;
+        ball = {
+            x: sx, y: sy,
+            vx: 0, vy: 0,
+            z: 14, vz: 0,
+            r: 8,
+            lastHit: serving,
+            bounces: 0,
+            active: false,
+            spin: 0
+        };
+        trail = [];
+    }
+
+    function serve() {
+        spawnBall();
+        const targetX = W / 2 + (Math.random() - 0.5) * 300;
+        const dir = serving === 'player' ? -1 : 1;
+        ball.vx = (targetX - ball.x) * 0.016;
+        ball.vy = dir * 5.2;
+        ball.vz = 5.2;
+        ball.active = true;
+    }
+
+    function showBanner(text, cls, time) {
+        const b = document.getElementById('banner');
+        b.innerHTML = text;
+        b.className = 'banner ' + cls;
+        void b.offsetWidth;
+        b.classList.add('show');
+        setTimeout(() => b.classList.remove('show'), time || 1200);
+    }
+
+    function awardPoint(who) {
+        totalPoints++;
+        if (who === 'player') {
+            pScore.points++;
+            playSound('point');
+            showBanner('PONTO! ' + displayP + ' - ' + displayO, 'ponto');
+        } else {
+            oScore.points++;
+            playSound('lose');
+            showBanner('PONTO DA IA', 'erro');
+        }
+        updateScoreUI();
+
+        const p = pScore.points, o = oScore.points;
+        let gameWon = false;
+        if (p >= 4 && p - o >= 2) { pScore.games++; gameWon = true; }
+        if (o >= 4 && o - p >= 2) { oScore.games++; gameWon = true; }
+
+        if (gameWon) {
+            updateScoreUI();
+            if (pScore.games >= 2 || oScore.games >= 2) {
+                setTimeout(endGame, 1300);
+            } else {
+                playSound('game');
+                showBanner((pScore.games > oScore.games ? 'SEU GAME!' : 'GAME DA IA') + '<br>' + pScore.games + ' x ' + oScore.games, 'game', 1800);
+                pScore.points = 0;
+                oScore.points = 0;
+                setTimeout(() => {
+                    serving = Math.random() < 0.5 ? 'player' : 'opp';
+                    updateScoreUI();
+                    servingCountdown = 70;
+                    ball = null;
+                }, 1500);
+            }
+            return;
+        }
+
+        setTimeout(() => {
+            serving = who === 'player' ? 'player' : 'opp';
+            updateScoreUI();
+            servingCountdown = 70;
+            ball = null;
+        }, 1200);
+    }
+
+    function endGame() {
+        state = 'idle';
+        let record = '';
+        if (totalPoints > best) {
+            best = totalPoints;
+            localStorage.setItem('tennis_best_pts', best);
+            loadBest();
+            record = '🏆 NOVO RECORDE DE PONTOS!';
+        }
+        const win = pScore.games >= 2;
+        document.getElementById('endTitle').textContent = win ? 'CAMPEÃO! 🏆' : 'DERROTA!';
+        document.getElementById('endSub').innerHTML =
+            'Placar final: <b>' + pScore.games + ' x ' + oScore.games + '</b><br>' +
+            'Total de pontos na partida: <b>' + totalPoints + '</b><br>' + record;
+        document.getElementById('endOverlay').classList.add('show');
+        if (win) playSound('game');
+    }
+
+    function playerHit() {
+        const speed = Math.hypot(mouse.x - mouse.prevX, 8);
+        const spin = (mouse.x - mouse.prevX) * 0.06;
+        const targetX = W / 2 + (Math.random() - 0.5) * (COURT.w - 100) + Math.max(-40, Math.min(40, spin * 40));
+        const targetY = 60 + Math.random() * 40;
+        ball.vx = (targetX - ball.x) * 0.014 + spin;
+        ball.vy = -5.6 - Math.random() * 1.4;
+        ball.vz = 4.6 + Math.random() * 0.8;
+        ball.lastHit = 'player';
+        ball.bounces = 0;
+        playSound('hit');
+        spawnParticles(ball.x, ball.y, '#a3e635', 8);
+        hitCooldown = 12;
+    }
+
+    function aiHit() {
+        const cfg = DIFF[diff];
+        const err = (Math.random() - 0.5) * cfg.aiErr * 2;
+        const targetX = W / 2 + err + (Math.random() < 0.25 ? (Math.random() - 0.5) * 140 : 0);
+        const targetY = H - 60 + Math.random() * 30;
+        ball.vx = (targetX - ball.x) * 0.014;
+        ball.vy = cfg.aiPower * (0.85 + Math.random() * 0.3);
+        ball.vz = 4.4 + Math.random() * 0.8;
+        ball.lastHit = 'opp';
+        ball.bounces = 0;
+        playSound('hit');
+        hitCooldown = 12;
+    }
+
+    function update() {
+        if (state !== 'play') return;
+
+        if (servingCountdown > 0) {
+            servingCountdown--;
+            if (servingCountdown === 0) serve();
+        }
+
+        player.x = mouse.x;
+        player.y = H - 70 + Math.max(-24, Math.min(24, (mouse.y - (H - 70))));
+        player.vx = mouse.x - mouse.prevX;
+        mouse.prevX = mouse.x;
+
+        const cfg = DIFF[diff];
+        if (ball && ball.active && ball.lastHit === 'player') {
+            const tx = ball.x + ball.vx * 22;
+            opp.x += Math.max(-cfg.aiSpeed, Math.min(cfg.aiSpeed, (tx - opp.x) * 0.08));
+        } else if (ball && ball.active) {
+            opp.x += Math.max(-cfg.aiSpeed, Math.min(cfg.aiSpeed, (ball.x - opp.x) * 0.12));
+        } else {
+            opp.x += (W / 2 - opp.x) * 0.05;
+        }
+        opp.x = Math.max(COURT.x + opp.w / 2, Math.min(COURT.x + COURT.w - opp.w / 2, opp.x));
+
+        if (ball && ball.active) {
+            trail.push({ x: ball.x, y: ball.y - ball.z, life: 1 });
+            if (trail.length > 10) trail.shift();
+
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+            ball.vz -= 0.3;
+            ball.z += ball.vz;
+
+            if (ball.z <= 0) {
+                ball.z = 0;
+                ball.bounces++;
+                ball.vz = Math.abs(ball.vz) * 0.55;
+                ball.vx *= 0.9; ball.vy *= 0.9;
+                if (ball.bounces > 2 && ball.vz < 1) {
+                    const inCourt = ball.x > COURT.x && ball.x < COURT.x + COURT.w && ball.y > COURT.y && ball.y < COURT.y + COURT.h;
+                    const winnerSide = ball.y > NET_Y ? 'opp' : 'player';
+                    if (inCourt) {
+                        awardPoint(ball.lastHit === 'player' ? 'opp' : 'player');
+                    } else {
+                        awardPoint(ball.lastHit === 'player' ? 'opp' : 'player');
+                    }
+                    ball.active = false;
+                    return;
+                }
+            }
+
+            if (hitCooldown > 0) hitCooldown--;
+
+            if (ball.y > NET_Y + 6 && ball.lastHit !== 'player' && hitCooldown === 0 &&
+                Math.abs(ball.x - player.x) < player.w / 2 + ball.r &&
+                Math.abs(ball.y - player.y) < 34 && ball.z < 44) {
+                playerHit();
+            }
+
+            if (ball.y < NET_Y - 6 && ball.lastHit !== 'opp' && hitCooldown === 0 &&
+                Math.abs(ball.x - opp.x) < opp.w / 2 + ball.r &&
+                Math.abs(ball.y - opp.y) < 34 && ball.z < 44) {
+                aiHit();
+            }
+
+            if (Math.abs(ball.y - NET_Y) < 4 && ball.z < 16 && ball.active) {
+                const passed = ball.vy < 0 ? 'opp' : 'player';
+                if (ball.lastHit !== passed) {
+                    playSound('net');
+                    showBanner('NA REDE!', 'erro');
+                    awardPoint(passed === 'player' ? 'player' : 'opp');
+                    ball.active = false;
+                    return;
+                }
+            }
+
+            if (ball.x < COURT.x - 20 || ball.x > COURT.x + COURT.w + 20 ||
+                ball.y < COURT.y - 20 || ball.y > COURT.y + COURT.h + 20) {
+                if (ball.lastHit === 'player') {
+                    const wasTargeted = ball.y < NET_Y;
+                    awardPoint(wasTargeted && ball.bounces > 0 ? 'player' : 'opp');
+                } else {
+                    awardPoint('player');
+                }
+                ball.active = false;
+                return;
+            }
+        }
+
+        for (const t of trail) t.life -= 0.1;
+        while (trail.length && trail[0].life <= 0) trail.shift();
+
+        particles = particles.filter(p => {
+            p.x += p.vx; p.y += p.vy; p.life -= 0.04;
+            return p.life > 0;
+        });
+    }
+
+    function spawnParticles(x, y, color, n) {
+        for (let i = 0; i < n; i++) {
+            particles.push({
+                x, y, vx: (Math.random() - 0.5) * 5, vy: (Math.random() - 0.5) * 5,
+                life: 1, color, size: 2 + Math.random() * 2
+            });
+        }
+    }
+
+    function drawCourt() {
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = '#131b33';
+        ctx.fillRect(0, 0, W, H);
+
+        const g = ctx.createLinearGradient(0, COURT.y, 0, COURT.y + COURT.h);
+        g.addColorStop(0, '#1e6f3c');
+        g.addColorStop(0.5, '#2d8f4e');
+        g.addColorStop(1, '#1e6f3c');
+        ctx.fillStyle = g;
+        ctx.fillRect(COURT.x, COURT.y, COURT.w, COURT.h);
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(COURT.x, COURT.y, COURT.w, COURT.h);
+
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(COURT.x + 30, COURT.y + 40, COURT.w - 60, COURT.h - 80);
+        ctx.beginPath();
+        ctx.moveTo(COURT.x + 30, NET_Y);
+        ctx.lineTo(COURT.x + COURT.w - 30, NET_Y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(W / 2, COURT.y);
+        ctx.lineTo(W / 2, COURT.y + COURT.h);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(W / 2, COURT.y + 40, 5, 0, Math.PI * 2);
+        ctx.arc(W / 2, COURT.y + COURT.h - 40, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.fillRect(COURT.x - 6, NET_Y - 16, COURT.w + 12, 32);
+        ctx.fillStyle = 'rgba(255,255,255,0.75)';
+        for (let i = COURT.x; i < COURT.x + COURT.w; i += 8) {
+            ctx.fillRect(i, NET_Y - 14, 1.5, 28);
+        }
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(COURT.x - 8, NET_Y - 18, COURT.w + 16, 3);
+        ctx.fillRect(COURT.x - 8, NET_Y + 15, COURT.w + 16, 3);
+    }
+
+    function drawRacket(x, y, color, tilt) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(tilt);
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(0, 16);
+        ctx.lineTo(0, 30);
+        ctx.stroke();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 15, 22, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+        ctx.lineWidth = 1;
+        for (let i = -10; i <= 10; i += 5) {
+            ctx.beginPath();
+            ctx.moveTo(i, -Math.sqrt(22 * 22 * (1 - (i / 15) * (i / 15))));
+            ctx.lineTo(i, Math.sqrt(22 * 22 * (1 - (i / 15) * (i / 15))));
+            ctx.stroke();
+        }
+        for (let j = -16; j <= 16; j += 8) {
+            ctx.beginPath();
+            ctx.moveTo(-Math.sqrt(15 * 15 * (1 - (j / 22) * (j / 22))), j);
+            ctx.lineTo(Math.sqrt(15 * 15 * (1 - (j / 22) * (j / 22))), j);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    function draw() {
+        drawCourt();
+
+        for (const t of trail) {
+            ctx.globalAlpha = t.life * 0.4;
+            ctx.fillStyle = '#fde047';
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, ball.r * t.life, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        drawRacket(opp.x, opp.y, '#f87171', 0);
+        drawRacket(player.x, player.y, '#a3e635', (mouse.x - mouse.prevX) * 0.02);
+
+        if (ball) {
+            ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            ctx.beginPath();
+            ctx.ellipse(ball.x, ball.y + 4, ball.r * (1 - ball.z / 160), ball.r * 0.4 * (1 - ball.z / 160), 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#fde047';
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y - ball.z, ball.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y - ball.z, ball.r, 0.5, 2.5);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y - ball.z, ball.r, Math.PI + 0.5, Math.PI + 2.5);
+            ctx.stroke();
+        }
+
+        for (const p of particles) {
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        ctx.font = '11px "Press Start 2P", cursive';
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.textAlign = 'left';
+        ctx.fillText('VOCÊ ' + displayP, 16, H - 14);
+        ctx.fillStyle = '#f87171';
+        ctx.fillText('IA ' + displayO, W - 110, H - 14);
+
+        ctx.font = '8px "Press Start 2P", cursive';
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.textAlign = 'center';
+        if (state === 'play' && servingCountdown > 0)
+            ctx.fillText(serving === 'player' ? 'SEU SAQUE...' : 'SAQUE DA IA...', W / 2, NET_Y - 30);
+    }
+
+    canvas.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        const s = W / rect.width;
+        mouse.x = (e.clientX - rect.left) * s;
+        mouse.y = (e.clientY - rect.top) * s;
+    });
+    canvas.addEventListener('touchmove', e => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const s = W / rect.width;
+        mouse.x = (e.touches[0].clientX - rect.left) * s;
+        mouse.y = (e.touches[0].clientY - rect.top) * s;
+    }, { passive: false });
+
+    function loop() {
+        update();
+        draw();
+        requestAnimationFrame(loop);
+    }
+
+    loadBest();
+    updateScoreUI();
+    loop();
+    </script>
+</body>
+</html>

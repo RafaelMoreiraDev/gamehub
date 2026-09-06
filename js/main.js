@@ -597,9 +597,10 @@ const gamesDatabase = [
         icon: "🏀",
         rating: 4.6,
         plays: 13400,
-        badge: null,
-        description: "Torne-se o melhor jogador de basquete.",
+        badge: "new",
+        description: "Arremessos com física real! Tabela, rede e bola dourada.",
         color: "#f59e0b",
+        gameFile: "games/basketball.html",
         thumbnail: generateBasketballThumb
     },
     {
@@ -658,9 +659,10 @@ const gamesDatabase = [
         icon: "🎾",
         rating: 4.3,
         plays: 8200,
-        badge: null,
-        description: "Vença torneios e torne-se campeão.",
+        badge: "new",
+        description: "Tênis arcade com efeito e placar real. Melhor de 3 games!",
         color: "#65a30d",
+        gameFile: "games/tennis.html",
         thumbnail: generateTennisThumb
     },
     {
