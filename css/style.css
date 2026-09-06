@@ -442,6 +442,20 @@ section {
     .categories-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        text-align: center;
+    }
+
+    .footer-brand-header {
+        justify-content: center;
+    }
+
+    .footer-brand p {
+        margin: 0.8rem auto 0;
+    }
 }
 
 .category-card {
@@ -993,36 +1007,45 @@ section {
 
 .footer-content {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: 1.4fr 1fr 1fr;
     gap: 3rem;
     max-width: 1200px;
     margin: 0 auto 3rem;
+    align-items: start;
+}
+
+.footer-brand-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
 }
 
 .footer-brand .logo {
-    font-size: 2.5rem;
+    font-size: 2rem;
 }
 
 .footer-brand .brand-name {
-    font-size: 1rem;
+    font-size: 1.2rem;
 }
 
 .footer-brand p {
     color: var(--text-muted);
-    margin-top: 0.5rem;
+    margin-top: 0.8rem;
+    max-width: 320px;
+    line-height: 1.6;
 }
 
-.footer-links h4,
-.footer-social h4 {
-    margin-bottom: 1.5rem;
+.footer-links h4 {
+    margin-bottom: 1.2rem;
     color: var(--secondary-color);
+    font-size: 1rem;
 }
 
 .footer-links a {
     display: block;
     color: var(--text-muted);
     text-decoration: none;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.7rem;
     transition: color 0.3s ease;
 }
 
