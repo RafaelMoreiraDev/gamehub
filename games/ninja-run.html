@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corrida Ninja - GameHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Roboto', sans-serif;
+            color: white;
+            padding: 15px;
+        }
+        .game-header { text-align: center; margin-bottom: 10px; }
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.6rem;
+            background: linear-gradient(90deg, #3b82f6, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .game-container {
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            padding: 12px;
+            box-shadow: 0 0 50px rgba(59,130,246,0.3);
+            max-width: 560px;
+            width: 100%;
+            position: relative;
+        }
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+        }
+        .stat-value { color: #3b82f6; }
+        .stat-value.coins { color: #ffd700; }
+        .stat-value.best { color: #ffe66d; }
+        #gameCanvas {
+            display: block;
+            border-radius: 10px;
+            background: #0f172a;
+            border: 2px solid rgba(59,130,246,0.4);
+            max-width: 100%;
+        }
+        .controls { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+        .control-btn {
+            padding: 8px 16px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .btn-start { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; }
+        .btn-reset { background: linear-gradient(135deg, #ff6b6b, #cc5353); color: white; }
+        .control-btn:hover { transform: translateY(-2px); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .difficulty-selector { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+        .diff-btn {
+            padding: 6px 12px;
+            font-size: 0.5rem;
+            font-family: 'Press Start 2P', cursive;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            color: #a0a0a0;
+        }
+        .diff-btn.easy { color: #22c55e; }
+        .diff-btn.medium { color: #ffe66d; }
+        .diff-btn.hard { color: #ff6b6b; }
+        .diff-btn.active { border-color: currentColor; background: rgba(255,255,255,0.15); }
+        .instructions {
+            margin-top: 12px;
+            padding: 10px 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            text-align: center;
+        }
+        .instructions h3 { font-family: 'Press Start 2P', cursive; font-size: 0.5rem; color: #3b82f6; margin-bottom: 6px; }
+        .key { background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 5px; font-family: 'Press Start 2P', cursive; font-size: 0.5rem; }
+        .game-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 15px;
+            z-index: 10;
+            padding: 20px;
+        }
+        .game-overlay.visible { display: flex; }
+        .overlay-title { font-family: 'Press Start 2P', cursive; font-size: 1.2rem; margin-bottom: 15px; color: #ff6b6b; }
+        .overlay-stat-value { font-family: 'Press Start 2P', cursive; font-size: 1.1rem; color: #3b82f6; margin-bottom: 3px; }
+        .overlay-stat-label { color: #a0a0a0; font-size: 0.75rem; margin-bottom: 12px; text-align: center; }
+        .new-record { color: #ffe66d; font-family: 'Press Start 2P', cursive; font-size: 0.6rem; margin-bottom: 12px; animation: blink 0.8s infinite; }
+        @keyframes blink { 50% { opacity: 0.3; } }
+        .overlay-btn {
+            padding: 10px 25px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            margin: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">CORRIDA NINJA</h1>
+    </div>
+    <div class="game-container">
+        <div class="stats-bar">
+            <span>DIST: <span class="stat-value" id="score">0m</span></span>
+            <span>SHURIKENS: <span class="stat-value coins" id="coins">0</span></span>
+            <span>RECORDE: <span class="stat-value best" id="best">0m</span></span>
+        </div>
+        <canvas id="gameCanvas" width="500" height="300"></canvas>
+        <div class="game-overlay" id="gameOverOverlay">
+            <div class="overlay-title">NINJA CAIU!</div>
+            <div class="overlay-stat-value" id="finalScore">0m</div>
+            <div class="overlay-stat-label">distância percorrida</div>
+            <div class="new-record" id="newRecord" style="display:none">🏆 NOVO RECORDE!</div>
+            <button class="overlay-btn" onclick="startGame()">CORRER NOVAMENTE</button>
+        </div>
+        <div class="controls">
+            <button class="control-btn btn-start" id="startBtn" onclick="startGame()">INICIAR</button>
+            <button class="control-btn btn-reset" onclick="resetGame()">RESETAR</button>
+            <button class="control-btn btn-reset" id="musicBtn" onclick="toggleMusic()">🔊 MÚSICA</button>
+        </div>
+        <div class="difficulty-selector">
+            <button class="diff-btn easy active" onclick="setDifficulty('easy')">FÁCIL</button>
+            <button class="diff-btn medium" onclick="setDifficulty('medium')">MÉDIO</button>
+            <button class="diff-btn hard" onclick="setDifficulty('hard')">DIFÍCIL</button>
+        </div>
+        <div class="instructions">
+            <h3>CONTROLES</h3>
+            <span class="key">ESPAÇO / ↑ / CLIQUE = PULAR (2x no ar!)</span>
+        </div>
+    </div>
+
+    <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const GROUND = 250;
+
+    const diffConfig = {
+        easy: { speed: 5, spawnEvery: 95, shurikenChance: 0.15 },
+        medium: { speed: 6.5, spawnEvery: 75, shurikenChance: 0.25 },
+        hard: { speed: 8, spawnEvery: 58, shurikenChance: 0.35 }
+    };
+
+    let gs = { playing: false, score: 0, coins: 0, difficulty: 'easy', frame: 0 };
+    let best = parseInt(localStorage.getItem('ninja_best') || '0');
+    document.getElementById('best').textContent = best + 'm';
+
+    const ninja = { x: 90, y: GROUND, vy: 0, jumping: false, doubleJump: false, r: 18 };
+    let obstacles = [], coins = [], particles = [], clouds = [], hills = [];
+    let spawnTimer = 0, coinTimer = 0, speed = 5;
+
+    for (let i = 0; i < 4; i++) clouds.push({ x: Math.random()*500, y: 30+Math.random()*60, s: 0.3+Math.random()*0.3, w: 35+Math.random()*30 });
+    for (let i = 0; i < 6; i++) hills.push({ x: i*130, h: 30+Math.random()*45, w: 100+Math.random()*80 });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === ' ' || e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') {
+            e.preventDefault();
+            jump();
+        }
+    });
+    canvas.addEventListener('mousedown', jump);
+
+    function jump() {
+        if (!gs.playing) { startGame(); return; }
+        if (!ninja.jumping) {
+            ninja.vy = -11.5;
+            ninja.jumping = true;
+            playSound('jump');
+        } else if (!ninja.doubleJump) {
+            ninja.vy = -10;
+            ninja.doubleJump = true;
+            playSound('jump2');
+            for (let i = 0; i < 8; i++) particles.push({
+                x: ninja.x, y: ninja.y,
+                dx: (Math.random()-.5)*5, dy: (Math.random()-.5)*5,
+                r: 2.5, color: '#60a5fa', life: 1
+            });
+        }
+    }
+
+    function setDifficulty(d) {
+        if (gs.playing) return;
+        gs.difficulty = d;
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.diff-btn.${d}`).classList.add('active');
+    }
+
+    function startGame() {
+        gs.playing = true;
+        gs.score = 0; gs.coins = 0; gs.frame = 0;
+        speed = diffConfig[gs.difficulty].speed;
+        ninja.y = GROUND; ninja.vy = 0; ninja.jumping = false; ninja.doubleJump = false;
+        obstacles = []; coins = []; particles = [];
+        spawnTimer = 0; coinTimer = 0;
+        document.getElementById('score').textContent = '0m';
+        document.getElementById('coins').textContent = '0';
+        document.getElementById('gameOverOverlay').classList.remove('visible');
+        document.getElementById('startBtn').disabled = true;
+        startMusic();
+        gameLoop();
+    }
+
+    function resetGame() {
+        gs.playing = false;
+        stopMusic();
+        obstacles = []; coins = []; particles = [];
+        document.getElementById('gameOverOverlay').classList.remove('visible');
+        document.getElementById('startBtn').disabled = false;
+        draw();
+    }
+
+    function die() {
+        gs.playing = false;
+        stopMusic();
+        playSound('die');
+        const dist = Math.floor(gs.score);
+        const isRecord = dist > best;
+        if (isRecord) {
+            best = dist;
+            localStorage.setItem('ninja_best', best);
+            document.getElementById('best').textContent = best + 'm';
+        }
+        document.getElementById('finalScore').textContent = dist + 'm';
+        document.getElementById('newRecord').style.display = isRecord ? 'block' : 'none';
+        document.getElementById('gameOverOverlay').classList.add('visible');
+        document.getElementById('startBtn').disabled = false;
+    }
+
+    function update() {
+        const cfg = diffConfig[gs.difficulty];
+        gs.frame++;
+        gs.score += speed * 0.05;
+        speed += 0.0006;
+        document.getElementById('score').textContent = Math.floor(gs.score) + 'm';
+
+        // Física do ninja
+        ninja.vy += 0.55;
+        ninja.y += ninja.vy;
+        if (ninja.y >= GROUND) {
+            ninja.y = GROUND;
+            ninja.vy = 0;
+            ninja.jumping = false;
+            ninja.doubleJump = false;
+        }
+
+        // Cenário em parallax
+        clouds.forEach(c => {
+            c.x -= c.s * speed * 0.3;
+            if (c.x < -c.w) { c.x = canvas.width + c.w; c.y = 30 + Math.random()*60; }
+        });
+        hills.forEach(h => {
+            h.x -= speed * 0.2;
+            if (h.x < -h.w) { h.x = canvas.width + h.w/2; h.h = 30+Math.random()*45; h.w = 100+Math.random()*80; }
+        });
+
+        // Obstáculos
+        spawnTimer++;
+        if (spawnTimer >= cfg.spawnEvery) {
+            spawnTimer = 0;
+            const isShuriken = Math.random() < cfg.shurikenChance;
+            obstacles.push({
+                x: canvas.width + 30,
+                type: isShuriken ? 'shuriken' : 'crate',
+                w: isShuriken ? 18 : 26 + Math.random()*18,
+                h: isShuriken ? 18 : 28 + Math.random()*14,
+                y: isShuriken ? GROUND - (40 + Math.random()*50) : GROUND,
+                rot: 0
+            });
+        }
+
+        // Moedas
+        coinTimer++;
+        if (coinTimer > 120) {
+            coinTimer = 0;
+            coins.push({ x: canvas.width + 20, y: GROUND - (60 + Math.random()*70), r: 10, spin: 0, got: false });
+        }
+
+        coins.forEach((c, i) => {
+            c.x -= speed;
+            c.spin += 0.15;
+            if (c.x < -20) coins.splice(i, 1);
+            if (!c.got && Math.hypot(c.x - ninja.x, c.y - ninja.y) < c.r + ninja.r) {
+                c.got = true;
+                coins.splice(i, 1);
+                gs.coins++;
+                document.getElementById('coins').textContent = gs.coins;
+                playSound('coin');
+            }
+        });
+
+        obstacles.forEach((o, i) => {
+            o.x -= speed;
+            if (o.type === 'shuriken') o.rot += 0.2;
+            if (o.x < -50) obstacles.splice(i, 1);
+
+            // Colisão (hitbox reduzida para ser justo)
+            const nx = ninja.x, ny = ninja.y - 12;
+            const oTop = o.type === 'shuriken' ? o.y - o.h/2 : o.y - o.h;
+            const oBottom = o.y;
+            if (nx + 12 > o.x - o.w/2 && nx - 12 < o.x + o.w/2 &&
+                ny + 14 > oTop && ny - 14 < oBottom) {
+                die();
+            }
+        });
+
+        // Partículas
+        particles = particles.filter(p => p.life > 0);
+        particles.forEach(p => { p.x += p.dx - speed*0.3; p.y += p.dy; p.life -= 0.04; });
+    }
+
+    function draw() {
+        // Céu gradiente
+        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        grad.addColorStop(0, '#1e293b'); grad.addColorStop(0.7, '#0f172a'); grad.addColorStop(1, '#1e293b');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Lua
+        ctx.shadowBlur = 20; ctx.shadowColor = '#e2e8f0';
+        ctx.fillStyle = 'rgba(226,232,240,0.9)';
+        ctx.beginPath(); ctx.arc(420, 55, 24, 0, Math.PI*2); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath(); ctx.arc(410, 48, 20, 0, Math.PI*2); ctx.fill();
+
+        // Nuvens
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        clouds.forEach(c => {
+            ctx.beginPath(); ctx.ellipse(c.x, c.y, c.w, c.w*0.3, 0, 0, Math.PI*2); ctx.fill();
+        });
+
+        // Montanhas (parallax)
+        ctx.fillStyle = '#1e293b';
+        hills.forEach(h => {
+            ctx.beginPath();
+            ctx.moveTo(h.x - h.w/2, GROUND);
+            ctx.lineTo(h.x, GROUND - h.h);
+            ctx.lineTo(h.x + h.w/2, GROUND);
+            ctx.closePath(); ctx.fill();
+        });
+
+        // Chão
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(0, GROUND, canvas.width, canvas.height - GROUND);
+        ctx.fillStyle = 'rgba(59,130,246,0.2)';
+        ctx.fillRect(0, GROUND, canvas.width, 3);
+        // Marcas do chão
+        ctx.fillStyle = 'rgba(255,255,255,0.06)';
+        for (let x = (gs.frame * speed) % 40 - 40; x < canvas.width; x += 40) {
+            ctx.fillRect(x, GROUND + 12, 20, 3);
+        }
+
+        // Moedas
+        coins.forEach(c => {
+            const sx = Math.abs(Math.cos(c.spin));
+            ctx.shadowBlur = 10; ctx.shadowColor = '#ffd700';
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath(); ctx.ellipse(c.x, c.y, c.r * sx + 1, c.r, 0, 0, Math.PI*2); ctx.fill();
+            ctx.shadowBlur = 0;
+        });
+
+        // Obstáculos
+        obstacles.forEach(o => {
+            if (o.type === 'crate') {
+                ctx.shadowBlur = 8; ctx.shadowColor = '#f97316';
+                ctx.fillStyle = '#c2410c';
+                ctx.fillRect(o.x - o.w/2, o.y - o.h, o.w, o.h);
+                ctx.strokeStyle = '#7c2d12'; ctx.lineWidth = 3;
+                ctx.strokeRect(o.x - o.w/2, o.y - o.h, o.w, o.h);
+                ctx.beginPath();
+                ctx.moveTo(o.x - o.w/2, o.y - o.h); ctx.lineTo(o.x + o.w/2, o.y);
+                ctx.moveTo(o.x + o.w/2, o.y - o.h); ctx.lineTo(o.x - o.w/2, o.y);
+                ctx.stroke();
+            } else {
+                ctx.save();
+                ctx.translate(o.x, o.y);
+                ctx.rotate(o.rot);
+                ctx.shadowBlur = 12; ctx.shadowColor = '#e2e8f0';
+                ctx.fillStyle = '#cbd5e1';
+                ctx.beginPath();
+                for (let i = 0; i < 4; i++) {
+                    ctx.rotate(Math.PI/2);
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(10, -4);
+                    ctx.lineTo(10, 4);
+                }
+                ctx.fill();
+                ctx.fillStyle = '#0f172a';
+                ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, Math.PI*2); ctx.fill();
+                ctx.restore();
+            }
+            ctx.shadowBlur = 0;
+        });
+
+        // Ninja
+        ctx.save();
+        ctx.translate(ninja.x, ninja.y);
+        ctx.shadowBlur = 15; ctx.shadowColor = '#60a5fa';
+
+        // Corpo
+        ctx.fillStyle = '#1e3a5f';
+        ctx.beginPath();
+        ctx.roundRect(-11, -30, 22, 30, 8);
+        ctx.fill();
+
+        // Faixa vermelha
+        ctx.fillStyle = '#dc2626';
+        ctx.fillRect(-11, -22, 22, 4);
+
+        // Cabeça
+        ctx.fillStyle = '#1e3a5f';
+        ctx.beginPath(); ctx.arc(0, -34, 10, 0, Math.PI*2); ctx.fill();
+        // Máscara
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-10, -34, 20, 8);
+        // Olhos
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillRect(-5, -38, 4, 3);
+        ctx.fillRect(2, -38, 4, 3);
+
+        // Pernas animadas
+        ctx.strokeStyle = '#1e3a5f'; ctx.lineWidth = 5;
+        const run = Math.sin(gs.frame * 0.4) * 6;
+        ctx.beginPath();
+        ctx.moveTo(-3, 0); ctx.lineTo(-3 + run, 10);
+        ctx.moveTo(3, 0); ctx.lineTo(3 - run, 10);
+        ctx.stroke();
+
+        // Espada nas costas
+        ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-8, -28); ctx.lineTo(14, -44);
+        ctx.stroke();
+
+        // Aura de pulo duplo
+        if (ninja.jumping && !ninja.doubleJump) {
+            ctx.strokeStyle = 'rgba(96,165,250,0.4)';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(0, -15, 24, 0, Math.PI*2); ctx.stroke();
+        }
+
+        ctx.restore();
+        ctx.shadowBlur = 0;
+
+        // Partículas
+        particles.forEach(p => {
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+    }
+
+    function gameLoop() {
+        if (!gs.playing) return;
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // ============ SOM ============
+    const AC = window.AudioContext || window.webkitAudioContext;
+    let audioCtx;
+    function initAudio() { if (!audioCtx) audioCtx = new AC(); }
+    function playSound(type) {
+        initAudio();
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+        const cfg = {
+            jump: { f1: 300, f2: 600, t: 'square', v: 0.08, d: 0.12 },
+            jump2: { f1: 500, f2: 900, t: 'square', v: 0.08, d: 0.12 },
+            coin: { f1: 1000, f2: 1400, t: 'sine', v: 0.1, d: 0.12 },
+            die: { f1: 250, f2: 50, t: 'sawtooth', v: 0.2, d: 0.45 }
+        }[type];
+        o.type = cfg.t;
+        o.frequency.setValueAtTime(cfg.f1, now);
+        o.frequency.exponentialRampToValueAtTime(cfg.f2, now + cfg.d * 0.8);
+        g.gain.value = cfg.v;
+        g.gain.exponentialRampToValueAtTime(0.01, now + cfg.d);
+        o.start(); o.stop(now + cfg.d + 0.02);
+    }
+
+    // Música de ação rápida
+    let musicOn = true, musicIntervals = [], musicMaster = null, mStep = 0;
+    function startMusic() {
+        initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        stopMusic();
+        if (!musicOn) return;
+        musicMaster = audioCtx.createGain();
+        musicMaster.gain.value = 0.4;
+        musicMaster.connect(audioCtx.destination);
+        const bass = [73.4, 73.4, 87.3, 73.4, 98, 73.4, 110, 98];
+        musicIntervals.push(setInterval(() => {
+            if (!gs.playing || !musicOn || !audioCtx) return;
+            const now = audioCtx.currentTime;
+            const step = mStep % 16;
+            if (step % 2 === 0) {
+                const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                o.connect(g); g.connect(musicMaster);
+                o.type = 'sawtooth'; o.frequency.value = bass[(step/2) % 8];
+                g.gain.setValueAtTime(0.09, now);
+                g.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+                o.start(); o.stop(now + 0.18);
+            }
+            if (step % 4 === 0) {
+                const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                o.connect(g); g.connect(musicMaster);
+                o.type = 'sine';
+                o.frequency.setValueAtTime(120, now);
+                o.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+                g.gain.setValueAtTime(0.13, now);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                o.start(); o.stop(now + 0.14);
+            }
+            if (step === 10 || step === 14) {
+                const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                o.connect(g); g.connect(musicMaster);
+                o.type = 'square'; o.frequency.value = step === 10 ? 587 : 784;
+                g.gain.setValueAtTime(0.04, now);
+                g.gain.exponentialRampToValueAtTime(0.005, now + 0.12);
+                o.start(); o.stop(now + 0.14);
+            }
+            mStep++;
+        }, 125));
+    }
+    function stopMusic() {
+        musicIntervals.forEach(clearInterval); musicIntervals = [];
+        if (musicMaster) { try { musicMaster.disconnect(); } catch(e){} musicMaster = null; }
+    }
+    function toggleMusic() {
+        musicOn = !musicOn;
+        document.getElementById('musicBtn').textContent = musicOn ? '🔊 MÚSICA' : '🔇 MUDO';
+        if (musicOn && gs.playing) startMusic(); else stopMusic();
+    }
+
+    draw();
+    </script>
+</body>
+</html>

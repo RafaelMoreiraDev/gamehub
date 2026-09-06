@@ -392,6 +392,63 @@ function generateSpaceThumb(ctx, w, h) {
     ctx.fillStyle = '#00ffff'; ctx.fillRect(w/2-1, h*0.5, 2, 20);
 }
 
+function generateSnakeThumb(ctx, w, h) {
+    const grad = ctx.createLinearGradient(0, 0, w, h);
+    grad.addColorStop(0, '#14532d'); grad.addColorStop(1, '#0a0f0a');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+    // Grid
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    for(let x=0;x<8;x++) for(let y=0;y<5;y++) if((x+y)%2===0) ctx.fillRect(x*40, y*40, 40, 40);
+    // Corpo da cobra
+    const body = [[5,2],[4,2],[3,2],[2,2],[2,3],[2,4]];
+    body.forEach(([x,y],i) => {
+        const t = i/body.length;
+        ctx.fillStyle = i===0 ? '#4ade80' : `rgba(34,197,94,${1-t*0.6})`;
+        ctx.beginPath(); ctx.roundRect(x*40+3, y*40+3, 34, 34, 6); ctx.fill();
+    });
+    // Olhos
+    ctx.fillStyle = '#0a0f0a';
+    ctx.beginPath(); ctx.arc(5*40+14, 2*40+14, 4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(5*40+26, 2*40+14, 4, 0, Math.PI*2); ctx.fill();
+    // Maçã
+    ctx.shadowBlur = 15; ctx.shadowColor = '#ff6b6b';
+    ctx.fillStyle = '#ff6b6b';
+    ctx.beginPath(); ctx.arc(7*40+20, 3*40+20, 12, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#16a34a';
+    ctx.fillRect(7*40+18, 3*40+3, 4, 8);
+}
+
+function generateFlappyThumb(ctx, w, h) {
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, '#4facfe'); grad.addColorStop(1, '#16213e');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+    // Nuvens
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.beginPath(); ctx.ellipse(w*0.2, h*0.25, 30, 10, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(w*0.7, h*0.15, 25, 8, 0, 0, Math.PI*2); ctx.fill();
+    // Canos
+    ctx.fillStyle = '#2ea043';
+    ctx.fillRect(w*0.55, 0, 55, h*0.35);
+    ctx.fillRect(w*0.55, h*0.65, 55, h*0.35);
+    ctx.fillStyle = '#4ade80';
+    ctx.fillRect(w*0.55-4, h*0.35-14, 63, 14);
+    ctx.fillRect(w*0.55-4, h*0.65, 63, 14);
+    // Pássaro
+    ctx.shadowBlur = 12; ctx.shadowColor = '#ffe66d';
+    ctx.fillStyle = '#ffe66d';
+    ctx.beginPath(); ctx.arc(w*0.28, h*0.45, 20, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#f59e0b';
+    ctx.beginPath(); ctx.ellipse(w*0.26, h*0.48, 11, 7, 0.2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(w*0.32, h*0.42, 6, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#0a0a1a';
+    ctx.beginPath(); ctx.arc(w*0.34, h*0.42, 3, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#f97316';
+    ctx.beginPath(); ctx.moveTo(w*0.36, h*0.46); ctx.lineTo(w*0.46, h*0.49); ctx.lineTo(w*0.36, h*0.52); ctx.fill();
+}
+
 // Dados dos Jogos
 const gamesDatabase = [
     {
@@ -451,9 +508,10 @@ const gamesDatabase = [
         icon: "🥷",
         rating: 4.8,
         plays: 16800,
-        badge: "top",
-        description: "Corra, salte e desvie como um verdadeiro ninja.",
+        badge: "new",
+        description: "Corra, pule (até 2x!) e colete shurikens douradas. Com recorde salvo!",
         color: "#3b82f6",
+        gameFile: "games/ninja-run.html",
         thumbnail: generateNinjaThumb
     },
     {
@@ -652,6 +710,32 @@ const gamesDatabase = [
         color: "#00ff88",
         gameFile: "games/space-invaders.html",
         thumbnail: generateSpaceThumb
+    },
+    {
+        id: 23,
+        title: "Cobrinha",
+        category: "puzzle",
+        icon: "🐍",
+        rating: 4.9,
+        plays: 42000,
+        badge: "popular",
+        description: "O clássico viciante da cobrinha! Coma maçãs e bata seu recorde.",
+        color: "#22c55e",
+        gameFile: "games/snake.html",
+        thumbnail: generateSnakeThumb
+    },
+    {
+        id: 24,
+        title: "Pássaro Saltador",
+        category: "acao",
+        icon: "🐦",
+        rating: 4.5,
+        plays: 35800,
+        badge: "new",
+        description: "Voe entre os canos! Um toque, mil frustrações — o mais difícil do site!",
+        color: "#4facfe",
+        gameFile: "games/flappy.html",
+        thumbnail: generateFlappyThumb
     }
 ];
 

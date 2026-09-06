@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cobrinha - GameHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Roboto', sans-serif;
+            color: white;
+            padding: 15px;
+        }
+        .game-header { text-align: center; margin-bottom: 10px; }
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.6rem;
+            background: linear-gradient(90deg, #22c55e, #a3e635);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .game-container {
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            padding: 12px;
+            box-shadow: 0 0 50px rgba(34,197,94,0.3);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+        }
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+        }
+        .stat-value { color: #22c55e; }
+        .stat-value.best { color: #ffe66d; }
+        #gameCanvas {
+            display: block;
+            border-radius: 10px;
+            background: #0a0f0a;
+            border: 2px solid rgba(34,197,94,0.4);
+            max-width: 100%;
+        }
+        .controls { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+        .control-btn {
+            padding: 8px 16px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-start { background: linear-gradient(135deg, #22c55e, #16a34a); color: #0a0a1a; }
+        .btn-pause { background: linear-gradient(135deg, #ffe66d, #ccbb5a); color: #0a0a1a; }
+        .btn-reset { background: linear-gradient(135deg, #ff6b6b, #cc5353); color: white; }
+        .control-btn:hover { transform: translateY(-2px); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .difficulty-selector { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+        .diff-btn {
+            padding: 6px 12px;
+            font-size: 0.5rem;
+            font-family: 'Press Start 2P', cursive;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            color: #a0a0a0;
+        }
+        .diff-btn.easy { color: #22c55e; }
+        .diff-btn.medium { color: #ffe66d; }
+        .diff-btn.hard { color: #ff6b6b; }
+        .diff-btn.active { border-color: currentColor; background: rgba(255,255,255,0.15); }
+        .instructions {
+            margin-top: 12px;
+            padding: 10px 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            text-align: center;
+        }
+        .instructions h3 { font-family: 'Press Start 2P', cursive; font-size: 0.5rem; color: #22c55e; margin-bottom: 6px; }
+        .key { background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 5px; font-family: 'Press Start 2P', cursive; font-size: 0.5rem; }
+        .game-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 15px;
+            z-index: 10;
+            padding: 20px;
+        }
+        .game-overlay.visible { display: flex; }
+        .overlay-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .overlay-title.gameover { color: #ff6b6b; }
+        .overlay-title.paused { color: #ffe66d; }
+        .overlay-stat-value { font-family: 'Press Start 2P', cursive; font-size: 1.1rem; color: #22c55e; margin-bottom: 3px; }
+        .overlay-stat-label { color: #a0a0a0; font-size: 0.75rem; margin-bottom: 12px; text-align: center; }
+        .new-record {
+            color: #ffe66d;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            margin-bottom: 12px;
+            animation: blink 0.8s infinite;
+        }
+        @keyframes blink { 50% { opacity: 0.3; } }
+        .overlay-btn {
+            padding: 10px 25px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #0a0a1a;
+            margin: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">COBRINHA</h1>
+    </div>
+    <div class="game-container">
+        <div class="stats-bar">
+            <span>SCORE: <span class="stat-value" id="score">0</span></span>
+            <span>RECORDE: <span class="stat-value best" id="best">0</span></span>
+        </div>
+        <canvas id="gameCanvas" width="420" height="420"></canvas>
+        <div class="game-overlay" id="gameOverOverlay">
+            <div class="overlay-title gameover">GAME OVER</div>
+            <div class="overlay-stat-value" id="finalScore">0</div>
+            <div class="overlay-stat-label">maçãs devoradas</div>
+            <div class="new-record" id="newRecord" style="display:none">🏆 NOVO RECORDE!</div>
+            <button class="overlay-btn" onclick="resetGame()">JOGAR NOVAMENTE</button>
+        </div>
+        <div class="game-overlay" id="pauseOverlay">
+            <div class="overlay-title paused">PAUSADO</div>
+            <button class="overlay-btn" onclick="togglePause()">CONTINUAR</button>
+        </div>
+        <div class="controls">
+            <button class="control-btn btn-start" id="startBtn" onclick="startGame()">INICIAR</button>
+            <button class="control-btn btn-pause" id="pauseBtn" onclick="togglePause()" disabled>PAUSAR</button>
+            <button class="control-btn btn-reset" onclick="resetGame()">RESETAR</button>
+            <button class="control-btn btn-reset" id="musicBtn" onclick="toggleMusic()">🔊 MÚSICA</button>
+        </div>
+        <div class="difficulty-selector">
+            <button class="diff-btn easy active" onclick="setDifficulty('easy')">FÁCIL</button>
+            <button class="diff-btn medium" onclick="setDifficulty('medium')">MÉDIO</button>
+            <button class="diff-btn hard" onclick="setDifficulty('hard')">DIFÍCIL</button>
+        </div>
+        <div class="instructions">
+            <h3>CONTROLES</h3>
+            <span class="key">← ↑ → ↓ / W A S D</span> &nbsp; <span class="key">P = Pausar</span>
+        </div>
+    </div>
+
+    <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const GRID = 21, CELL = 20;
+
+    const diffSpeed = { easy: 140, medium: 100, hard: 65 };
+    let gs = { playing: false, paused: false, score: 0, difficulty: 'easy', dir: {x:1,y:0}, nextDir: {x:1,y:0}, keysHeld: {} };
+    let snake, food, moveTimer = 0, lastTime = 0, particles = [];
+    let best = parseInt(localStorage.getItem('snake_best') || '0');
+    document.getElementById('best').textContent = best;
+
+    function resetSnake() {
+        snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+        gs.dir = {x:1,y:0}; gs.nextDir = {x:1,y:0};
+        gs.score = 0;
+        document.getElementById('score').textContent = 0;
+        placeFood();
+    }
+
+    function placeFood() {
+        do { food = { x: rnd(0,GRID-1), y: rnd(0,GRID-1) }; }
+        while (snake.some(s => s.x===food.x && s.y===food.y));
+    }
+    function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+
+    document.addEventListener('keydown', e => {
+        const k = e.key;
+        const map = { ArrowUp:{x:0,y:-1}, ArrowDown:{x:0,y:1}, ArrowLeft:{x:-1,y:0}, ArrowRight:{x:1,y:0},
+                      w:{x:0,y:-1}, s:{x:0,y:1}, a:{x:-1,y:0}, d:{x:1,y:0} };
+        if (map[k]) {
+            e.preventDefault();
+            const nd = map[k];
+            // Não permite reverter 180°
+            if (nd.x !== -gs.dir.x || nd.y !== -gs.dir.y) gs.nextDir = nd;
+        }
+        if (k === 'p' || k === 'P') { if (gs.playing) togglePause(); }
+        if (k === ' ' && !gs.playing) startGame();
+    });
+
+    function setDifficulty(d) {
+        if (gs.playing) return;
+        gs.difficulty = d;
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.diff-btn.${d}`).classList.add('active');
+    }
+
+    function startGame() {
+        if (gs.playing) return;
+        resetSnake();
+        gs.playing = true; gs.paused = false;
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('pauseBtn').disabled = false;
+        hideAllOverlays();
+        startMusic();
+        lastTime = performance.now();
+        gameLoop();
+    }
+
+    function togglePause() {
+        if (!gs.playing) return;
+        gs.paused = !gs.paused;
+        document.getElementById('pauseOverlay').classList.toggle('visible', gs.paused);
+        document.getElementById('pauseBtn').textContent = gs.paused ? 'CONTINUAR' : 'PAUSAR';
+        if (!gs.paused) { lastTime = performance.now(); gameLoop(); }
+    }
+
+    function resetGame() {
+        gs.playing = false;
+        stopMusic();
+        hideAllOverlays();
+        resetSnake();
+        draw();
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('pauseBtn').disabled = true;
+        document.getElementById('pauseBtn').textContent = 'PAUSAR';
+    }
+
+    function hideAllOverlays() {
+        document.querySelectorAll('.game-overlay').forEach(o => o.classList.remove('visible'));
+    }
+
+    function update() {
+        moveTimer += performance.now() - lastTime;
+        lastTime = performance.now();
+        const interval = diffSpeed[gs.difficulty];
+        if (moveTimer < interval) return;
+        moveTimer = 0;
+
+        gs.dir = gs.nextDir;
+        const head = { x: snake[0].x + gs.dir.x, y: snake[0].y + gs.dir.y };
+
+        // Colisão com paredes e corpo
+        if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID ||
+            snake.some(s => s.x === head.x && s.y === head.y)) {
+            die();
+            return;
+        }
+
+        snake.unshift(head);
+
+        // Comeu?
+        if (head.x === food.x && head.y === food.y) {
+            gs.score += 10;
+            document.getElementById('score').textContent = gs.score;
+            for (let i = 0; i < 10; i++) particles.push({
+                x: food.x*CELL+10, y: food.y*CELL+10,
+                dx:(Math.random()-.5)*6, dy:(Math.random()-.5)*6,
+                r: 3, color: '#ff6b6b', life: 1
+            });
+            playSound('eat');
+            placeFood();
+        } else {
+            snake.pop();
+        }
+    }
+
+    function die() {
+        gs.playing = false;
+        stopMusic();
+        playSound('die');
+        const isRecord = gs.score > best;
+        if (isRecord) {
+            best = gs.score;
+            localStorage.setItem('snake_best', best);
+            document.getElementById('best').textContent = best;
+        }
+        document.getElementById('finalScore').textContent = gs.score;
+        document.getElementById('newRecord').style.display = isRecord ? 'block' : 'none';
+        document.getElementById('gameOverOverlay').classList.add('visible');
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('pauseBtn').disabled = true;
+    }
+
+    function draw() {
+        ctx.fillStyle = '#0a0f0a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Grid sutil
+        ctx.fillStyle = 'rgba(255,255,255,0.02)';
+        for (let x = 0; x < GRID; x++) for (let y = 0; y < GRID; y++) {
+            if ((x + y) % 2 === 0) ctx.fillRect(x*CELL, y*CELL, CELL, CELL);
+        }
+
+        // Comida
+        ctx.shadowBlur = 15; ctx.shadowColor = '#ff6b6b';
+        ctx.fillStyle = '#ff6b6b';
+        ctx.beginPath();
+        ctx.arc(food.x*CELL+10, food.y*CELL+10, 7, 0, Math.PI*2);
+        ctx.fill();
+
+        // Snake
+        snake.forEach((s, i) => {
+            const t = i / snake.length;
+            ctx.shadowColor = i === 0 ? '#4ade80' : `rgba(34,197,94,${1-t*0.6})`;
+            ctx.fillStyle = i === 0 ? '#4ade80' : `rgba(34,197,94,${1-t*0.6})`;
+            ctx.beginPath();
+            ctx.roundRect(s.x*CELL+1, s.y*CELL+1, CELL-2, CELL-2, i===0 ? 6 : 4);
+            ctx.fill();
+        });
+
+        // Olhos na cabeça
+        if (snake.length) {
+            const h = snake[0];
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#0a0f0a';
+            const ex = gs.dir.x * 4, ey = gs.dir.y * 4;
+            ctx.beginPath(); ctx.arc(h.x*CELL+7+ex, h.y*CELL+7+ey, 2, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(h.x*CELL+13+ex, h.y*CELL+13+ey, 2, 0, Math.PI*2); ctx.fill();
+        }
+
+        // Partículas
+        ctx.shadowBlur = 0;
+        particles = particles.filter(p => p.life > 0);
+        particles.forEach(p => {
+            p.x += p.dx; p.y += p.dy; p.life -= 0.05;
+            ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+    }
+
+    function gameLoop() {
+        if (!gs.playing || gs.paused) return;
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // ============ SOM ============
+    const AC = window.AudioContext || window.webkitAudioContext;
+    let audioCtx;
+    function initAudio() { if (!audioCtx) audioCtx = new AC(); }
+    function playSound(type) {
+        initAudio();
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+        if (type === 'eat') {
+            o.type='sine'; o.frequency.setValueAtTime(600, now);
+            o.frequency.exponentialRampToValueAtTime(1000, now+0.08);
+            g.gain.value=0.12; g.gain.exponentialRampToValueAtTime(0.01, now+0.12);
+            o.start(); o.stop(now+0.12);
+        } else {
+            o.type='sawtooth'; o.frequency.setValueAtTime(300, now);
+            o.frequency.exponentialRampToValueAtTime(50, now+0.4);
+            g.gain.value=0.2; g.gain.exponentialRampToValueAtTime(0.01, now+0.4);
+            o.start(); o.stop(now+0.4);
+        }
+    }
+
+    // Música chiptune alegre em loop
+    let musicOn = true, musicIntervals = [], musicMaster = null, mStep = 0;
+    function startMusic() {
+        initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        stopMusic();
+        if (!musicOn) return;
+        musicMaster = audioCtx.createGain();
+        musicMaster.gain.value = 0.45;
+        musicMaster.connect(audioCtx.destination);
+        const bass = [110, 110, 98, 98, 130.8, 130.8, 87.3, 87.3];
+        const lead = [440, 0, 523, 0, 440, 0, 587, 659, 0, 587, 0, 523, 440, 0, 392, 0];
+        musicIntervals.push(setInterval(() => {
+            if (!gs.playing || gs.paused || !musicOn || !audioCtx) return;
+            const now = audioCtx.currentTime;
+            if (mStep % 2 === 0) {
+                const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                o.connect(g); g.connect(musicMaster);
+                o.type = 'triangle'; o.frequency.value = bass[(mStep/2) % 8];
+                g.gain.setValueAtTime(0.08, now);
+                g.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                o.start(); o.stop(now + 0.3);
+            }
+            const n = lead[mStep % 16];
+            if (n > 0) {
+                const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                o.connect(g); g.connect(musicMaster);
+                o.type = 'square'; o.frequency.value = n;
+                g.gain.setValueAtTime(0.045, now);
+                g.gain.exponentialRampToValueAtTime(0.005, now + 0.2);
+                o.start(); o.stop(now + 0.25);
+            }
+            mStep++;
+        }, 150));
+    }
+    function stopMusic() {
+        musicIntervals.forEach(clearInterval); musicIntervals = [];
+        if (musicMaster) { try { musicMaster.disconnect(); } catch(e){} musicMaster = null; }
+    }
+    function toggleMusic() {
+        musicOn = !musicOn;
+        document.getElementById('musicBtn').textContent = musicOn ? '🔊 MÚSICA' : '🔇 MUDO';
+        if (musicOn && gs.playing) startMusic(); else stopMusic();
+    }
+
+    resetSnake();
+    draw();
+    </script>
+</body>
+</html>

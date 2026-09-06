@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pássaro Saltador - GameHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Roboto', sans-serif;
+            color: white;
+            padding: 15px;
+        }
+        .game-header { text-align: center; margin-bottom: 10px; }
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.6rem;
+            background: linear-gradient(90deg, #4facfe, #ffe66d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .game-container {
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            padding: 12px;
+            box-shadow: 0 0 50px rgba(79,172,254,0.3);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+        }
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+        }
+        .stat-value { color: #4facfe; }
+        .stat-value.best { color: #ffe66d; }
+        #gameCanvas {
+            display: block;
+            border-radius: 10px;
+            background: linear-gradient(180deg, #87ceeb 0%, #1a1a2e 100%);
+            border: 2px solid rgba(79,172,254,0.4);
+            max-width: 100%;
+            cursor: pointer;
+        }
+        .controls { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+        .control-btn {
+            padding: 8px 16px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-start { background: linear-gradient(135deg, #4facfe, #2d7dd2); color: white; }
+        .btn-reset { background: linear-gradient(135deg, #ff6b6b, #cc5353); color: white; }
+        .control-btn:hover { transform: translateY(-2px); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .difficulty-selector { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+        .diff-btn {
+            padding: 6px 12px;
+            font-size: 0.5rem;
+            font-family: 'Press Start 2P', cursive;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            color: #a0a0a0;
+        }
+        .diff-btn.easy { color: #22c55e; }
+        .diff-btn.medium { color: #ffe66d; }
+        .diff-btn.hard { color: #ff6b6b; }
+        .diff-btn.active { border-color: currentColor; background: rgba(255,255,255,0.15); }
+        .instructions {
+            margin-top: 12px;
+            padding: 10px 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            text-align: center;
+        }
+        .instructions h3 { font-family: 'Press Start 2P', cursive; font-size: 0.5rem; color: #4facfe; margin-bottom: 6px; }
+        .key { background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 5px; font-family: 'Press Start 2P', cursive; font-size: 0.5rem; }
+        .game-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 15px;
+            z-index: 10;
+            padding: 20px;
+        }
+        .game-overlay.visible { display: flex; }
+        .overlay-title { font-family: 'Press Start 2P', cursive; font-size: 1.2rem; margin-bottom: 15px; color: #ff6b6b; }
+        .overlay-stat-value { font-family: 'Press Start 2P', cursive; font-size: 1.1rem; color: #4facfe; margin-bottom: 3px; }
+        .overlay-stat-label { color: #a0a0a0; font-size: 0.75rem; margin-bottom: 12px; text-align: center; }
+        .new-record {
+            color: #ffe66d; font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem; margin-bottom: 12px; animation: blink 0.8s infinite;
+        }
+        @keyframes blink { 50% { opacity: 0.3; } }
+        .overlay-btn {
+            padding: 10px 25px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #4facfe, #2d7dd2);
+            color: white;
+            margin: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">PÁSSARO SALTADOR</h1>
+    </div>
+    <div class="game-container">
+        <div class="stats-bar">
+            <span>SCORE: <span class="stat-value" id="score">0</span></span>
+            <span>RECORDE: <span class="stat-value best" id="best">0</span></span>
+        </div>
+        <canvas id="gameCanvas" width="420" height="500"></canvas>
+        <div class="game-overlay" id="gameOverOverlay">
+            <div class="overlay-title">GAME OVER</div>
+            <div class="overlay-stat-value" id="finalScore">0</div>
+            <div class="overlay-stat-label">canos passados</div>
+            <div class="new-record" id="newRecord" style="display:none">🏆 NOVO RECORDE!</div>
+            <button class="overlay-btn" onclick="startGame()">JOGAR NOVAMENTE</button>
+        </div>
+        <div class="controls">
+            <button class="control-btn btn-start" id="startBtn" onclick="startGame()">INICIAR</button>
+            <button class="control-btn btn-reset" onclick="resetGame()">RESETAR</button>
+            <button class="control-btn btn-reset" id="musicBtn" onclick="toggleMusic()">🔊 MÚSICA</button>
+        </div>
+        <div class="difficulty-selector">
+            <button class="diff-btn easy active" onclick="setDifficulty('easy')">FÁCIL</button>
+            <button class="diff-btn medium" onclick="setDifficulty('medium')">MÉDIO</button>
+            <button class="diff-btn hard" onclick="setDifficulty('hard')">DIFÍCIL</button>
+        </div>
+        <div class="instructions">
+            <h3>CONTROLES</h3>
+            <span class="key">CLIQUE / ESPAÇO = PULAR</span>
+        </div>
+    </div>
+
+    <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const diffConfig = {
+        easy: { gravity: 0.35, jump: -6.5, gap: 160, pipeSpeed: 2.2, spawnEvery: 110 },
+        medium: { gravity: 0.45, jump: -7, gap: 135, pipeSpeed: 2.8, spawnEvery: 95 },
+        hard: { gravity: 0.55, jump: -7.5, gap: 115, pipeSpeed: 3.4, spawnEvery: 80 }
+    };
+
+    let gs = { playing: false, score: 0, difficulty: 'easy', frame: 0 };
+    let best = parseInt(localStorage.getItem('flappy_best') || '0');
+    document.getElementById('best').textContent = best;
+
+    const bird = { x: 110, y: 250, r: 14, vy: 0, rot: 0 };
+    let pipes = [], particles = [], spawnTimer = 0, clouds = [];
+
+    for (let i = 0; i < 5; i++) clouds.push({ x: Math.random()*420, y: 40+Math.random()*200, s: 0.3+Math.random()*0.4, w: 40+Math.random()*40 });
+
+    function flap() {
+        if (!gs.playing) { startGame(); return; }
+        bird.vy = diffConfig[gs.difficulty].jump;
+        bird.rot = -0.5;
+        playSound('flap');
+        for (let i = 0; i < 4; i++) particles.push({
+            x: bird.x-10, y: bird.y+8,
+            dx: -1-Math.random()*2, dy: 1+Math.random()*2,
+            r: 2.5, color: 'rgba(255,255,255,0.8)', life: 1
+        });
+    }
+
+    canvas.addEventListener('mousedown', flap);
+    document.addEventListener('keydown', e => {
+        if (e.key === ' ' || e.key === 'ArrowUp') { e.preventDefault(); flap(); }
+    });
+
+    function setDifficulty(d) {
+        if (gs.playing) return;
+        gs.difficulty = d;
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.diff-btn.${d}`).classList.add('active');
+    }
+
+    function startGame() {
+        gs.playing = true;
+        gs.score = 0; gs.frame = 0;
+        document.getElementById('score').textContent = 0;
+        bird.y = 250; bird.vy = 0; bird.rot = 0;
+        pipes = []; particles = []; spawnTimer = 0;
+        document.getElementById('gameOverOverlay').classList.remove('visible');
+        document.getElementById('startBtn').disabled = true;
+        startMusic();
+        gameLoop();
+    }
+
+    function resetGame() {
+        gs.playing = false;
+        stopMusic();
+        pipes = []; particles = [];
+        document.getElementById('gameOverOverlay').classList.remove('visible');
+        document.getElementById('startBtn').disabled = false;
+        drawIdle();
+    }
+
+    function die() {
+        gs.playing = false;
+        stopMusic();
+        playSound('die');
+        const isRecord = gs.score > best;
+        if (isRecord) {
+            best = gs.score;
+            localStorage.setItem('flappy_best', best);
+            document.getElementById('best').textContent = best;
+        }
+        document.getElementById('finalScore').textContent = gs.score;
+        document.getElementById('newRecord').style.display = isRecord ? 'block' : 'none';
+        document.getElementById('gameOverOverlay').classList.add('visible');
+        document.getElementById('startBtn').disabled = false;
+    }
+
+    function update() {
+        const cfg = diffConfig[gs.difficulty];
+        gs.frame++;
+
+        bird.vy += cfg.gravity;
+        bird.y += bird.vy;
+        bird.rot = Math.max(-0.5, Math.min(1.2, bird.vy * 0.08));
+
+        // Spawn de canos
+        spawnTimer++;
+        if (spawnTimer >= cfg.spawnEvery) {
+            spawnTimer = 0;
+            const gapY = 80 + Math.random() * (canvas.height - cfg.gap - 160);
+            pipes.push({ x: canvas.width + 30, gapY: gapY, gap: cfg.gap, passed: false, w: 55 });
+        }
+
+        pipes.forEach((p, i) => {
+            p.x -= cfg.pipeSpeed;
+            if (p.x + p.w < -20) pipes.splice(i, 1);
+
+            // Pontuação
+            if (!p.passed && p.x + p.w < bird.x - bird.r) {
+                p.passed = true;
+                gs.score++;
+                document.getElementById('score').textContent = gs.score;
+                playSound('point');
+            }
+
+            // Colisão
+            if (bird.x + bird.r > p.x && bird.x - bird.r < p.x + p.w) {
+                if (bird.y - bird.r < p.gapY || bird.y + bird.r > p.gapY + p.gap) {
+                    die();
+                }
+            }
+        });
+
+        // Chão e teto
+        if (bird.y + bird.r > canvas.height - 10 || bird.y - bird.r < 0) die();
+
+        // Nuvens
+        clouds.forEach(c => {
+            c.x -= c.s;
+            if (c.x < -c.w) { c.x = canvas.width + c.w; c.y = 40 + Math.random()*200; }
+        });
+
+        // Partículas
+        particles = particles.filter(p => p.life > 0);
+        particles.forEach(p => { p.x += p.dx; p.y += p.dy; p.life -= 0.04; });
+    }
+
+    function drawBird() {
+        ctx.save();
+        ctx.translate(bird.x, bird.y);
+        ctx.rotate(bird.rot);
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#ffe66d';
+
+        // Corpo
+        ctx.fillStyle = '#ffe66d';
+        ctx.beginPath(); ctx.arc(0, 0, bird.r, 0, Math.PI*2); ctx.fill();
+
+        // Asa (bate com o tempo)
+        const wingY = Math.sin(gs.frame * 0.3) * 4;
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.ellipse(-4, 2 + wingY*0.3, 8, 5, wingY*0.05, 0, Math.PI*2);
+        ctx.fill();
+
+        // Olho
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(6, -5, 4.5, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#0a0a1a';
+        ctx.beginPath(); ctx.arc(7.5, -5, 2, 0, Math.PI*2); ctx.fill();
+
+        // Bico
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath();
+        ctx.moveTo(10, 0); ctx.lineTo(20, 3); ctx.lineTo(10, 6);
+        ctx.closePath(); ctx.fill();
+
+        ctx.restore();
+        ctx.shadowBlur = 0;
+    }
+
+    function draw() {
+        // Céu
+        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        grad.addColorStop(0, '#4facfe'); grad.addColorStop(1, '#16213e');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Nuvens
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        clouds.forEach(c => {
+            ctx.beginPath();
+            ctx.ellipse(c.x, c.y, c.w, c.w*0.3, 0, 0, Math.PI*2);
+            ctx.fill();
+        });
+
+        // Canos
+        pipes.forEach(p => {
+            ctx.shadowBlur = 10; ctx.shadowColor = '#22c55e';
+            ctx.fillStyle = '#2ea043';
+            ctx.fillRect(p.x, 0, p.w, p.gapY);
+            ctx.fillRect(p.x, p.gapY + p.gap, p.w, canvas.height - p.gapY - p.gap);
+            // Bocas dos canos
+            ctx.fillStyle = '#4ade80';
+            ctx.fillRect(p.x - 4, p.gapY - 14, p.w + 8, 14);
+            ctx.fillRect(p.x - 4, p.gapY + p.gap, p.w + 8, 14);
+            ctx.shadowBlur = 0;
+        });
+
+        // Chão
+        ctx.fillStyle = '#333';
+        ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        for (let x = (gs.frame * 2) % 30 - 30; x < canvas.width; x += 30) {
+            ctx.fillRect(x, canvas.height - 10, 15, 3);
+        }
+
+        // Partículas
+        particles.forEach(p => {
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+
+        drawBird();
+    }
+
+    function drawIdle() {
+        ctx.fillStyle = '#16213e';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        bird.y = 250; bird.rot = 0;
+        draw();
+    }
+
+    function gameLoop() {
+        if (!gs.playing) return;
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // ============ SOM ============
+    const AC = window.AudioContext || window.webkitAudioContext;
+    let audioCtx;
+    function initAudio() { if (!audioCtx) audioCtx = new AC(); }
+    function playSound(type) {
+        initAudio();
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+        if (type === 'flap') {
+            o.type='sine'; o.frequency.setValueAtTime(400, now);
+            o.frequency.exponentialRampToValueAtTime(700, now+0.06);
+            g.gain.value=0.08; g.gain.exponentialRampToValueAtTime(0.01, now+0.08);
+            o.start(); o.stop(now+0.08);
+        } else if (type === 'point') {
+            o.type='sine'; o.frequency.value=900;
+            g.gain.value=0.1; g.gain.exponentialRampToValueAtTime(0.01, now+0.12);
+            o.start(); o.stop(now+0.12);
+        } else {
+            o.type='sawtooth'; o.frequency.setValueAtTime(300, now);
+            o.frequency.exponentialRampToValueAtTime(60, now+0.4);
+            g.gain.value=0.18; g.gain.exponentialRampToValueAtTime(0.01, now+0.4);
+            o.start(); o.stop(now+0.4);
+        }
+    }
+
+    // Música: melodia leve
+    let musicOn = true, musicIntervals = [], musicMaster = null, mStep = 0;
+    function startMusic() {
+        initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        stopMusic();
+        if (!musicOn) return;
+        musicMaster = audioCtx.createGain();
+        musicMaster.gain.value = 0.4;
+        musicMaster.connect(audioCtx.destination);
+        const melody = [523, 659, 784, 659, 523, 587, 659, 0, 523, 659, 784, 880, 784, 659, 587, 0];
+        musicIntervals.push(setInterval(() => {
+            if (!gs.playing || !musicOn || !audioCtx) return;
+            const n = melody[mStep % 16];
+            const now = audioCtx.currentTime;
+            if (n > 0) {
+                const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                o.connect(g); g.connect(musicMaster);
+                o.type = 'triangle'; o.frequency.value = n;
+                g.gain.setValueAtTime(0.05, now);
+                g.gain.exponentialRampToValueAtTime(0.005, now + 0.25);
+                o.start(); o.stop(now + 0.3);
+            }
+            mStep++;
+        }, 180));
+    }
+    function stopMusic() {
+        musicIntervals.forEach(clearInterval); musicIntervals = [];
+        if (musicMaster) { try { musicMaster.disconnect(); } catch(e){} musicMaster = null; }
+    }
+    function toggleMusic() {
+        musicOn = !musicOn;
+        document.getElementById('musicBtn').textContent = musicOn ? '🔊 MÚSICA' : '🔇 MUDO';
+        if (musicOn && gs.playing) startMusic(); else stopMusic();
+    }
+
+    drawIdle();
+    </script>
+</body>
+</html>
