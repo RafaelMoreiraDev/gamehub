@@ -175,12 +175,12 @@
         }
 
         .piece-slot.dragging {
-            opacity: 0.85;
-            transform: scale(1.08);
+            opacity: 0.92;
             position: fixed;
             z-index: 200;
             pointer-events: none;
             box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+            background: rgba(30,25,60,0.9);
         }
 
         .piece-slot.used { opacity: 0.12; pointer-events: none; }
@@ -533,61 +533,79 @@
             if (gameOver || pieces[idx].used) return;
             e.preventDefault();
             ensureAudio();
-            const rect = slot.getBoundingClientRect();
-            dragState = { idx, slot, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top, w: rect.width, h: rect.height };
+            scaleUp(slot);
             slot.classList.add('dragging');
-            slot.style.left = rect.left + 'px';
-            slot.style.top = rect.top + 'px';
-            slot.style.width = rect.width + 'px';
+            document.body.appendChild(slot);
+            dragState = { idx, slot, lastX: e.clientX, lastY: e.clientY };
+            positionSlot(slot, e.clientX, e.clientY);
+            updateGhost(e.clientX, e.clientY);
         });
-
-        window.addEventListener('pointermove', moveDrag);
-        window.addEventListener('pointerup', endDrag);
     }
 
-    function moveDrag(e) {
-        if (!dragState) return;
-        const slot = dragState.slot;
-        slot.style.left = (e.clientX - dragState.offsetX) + 'px';
-        slot.style.top = (e.clientY - dragState.offsetY) + 'px';
-
-        clearGhost();
-        const target = snapToBoard(e, dragState.idx);
-        if (target) {
-            const { r0, c0, shape } = target;
-            let ok = true;
-            for (const [dr, dc] of shape.cells) {
-                if (r0 + dr >= N || c0 + dc >= N || board[r0 + dr][c0 + dc]) { ok = false; break; }
-            }
-            if (ok) {
-                for (const [dr, dc] of shape.cells) {
-                    boardEl[r0 + dr][c0 + dc].classList.add('ghost');
-                    boardEl[r0 + dr][c0 + dc].style.background = 'linear-gradient(145deg, ' + shape.ghostColor0 + ', ' + shape.ghostColor1 + ')';
-                }
-            }
-        }
-    }
-
-    function snapToBoard(e, idx) {
-        const rect = boardDiv.getBoundingClientRect();
+    function scaleUp(slot) {
         const cs = cellSize();
-        const gap = 3, pad = 8;
-        const unit = cs + gap;
-        const shape = pieces[idx].shape;
+        slot.querySelectorAll('.mini-cell').forEach(mc => {
+            mc.style.width = cs + 'px';
+            mc.style.height = cs + 'px';
+        });
+        const grid = slot.querySelector('.mini-grid');
+        const cols = parseInt(grid.style.gridTemplateColumns.match(/\d+/)[0]);
+        grid.style.gridTemplateColumns = 'repeat(' + cols + ', ' + cs + 'px)';
+        grid.style.gap = '3px';
+    }
+
+    function positionSlot(slot, cx, cy) {
+        const w = slot.offsetWidth, h = slot.offsetHeight;
+        slot.style.left = (cx - w / 2) + 'px';
+        slot.style.top = (cy - h / 2) + 'px';
+    }
+
+    window.addEventListener('scroll', () => {
+        if (!dragState) return;
+        positionSlot(dragState.slot, dragState.lastX, dragState.lastY);
+        updateGhost(dragState.lastX, dragState.lastY);
+    }, { passive: true });
+
+    window.addEventListener('pointermove', (e) => {
+        if (!dragState) return;
+        dragState.lastX = e.clientX;
+        dragState.lastY = e.clientY;
+        positionSlot(dragState.slot, e.clientX, e.clientY);
+        updateGhost(e.clientX, e.clientY);
+    });
+
+    function snapTarget() {
+        const shape = pieces[dragState.idx].shape;
+        const bRect = boardDiv.getBoundingClientRect();
+        const sRect = dragState.slot.getBoundingClientRect();
+        const unit = cellSize() + 3;
+        const SLOT_PAD = 10, BOARD_PAD = 8;
+        const r0 = Math.round((sRect.top + SLOT_PAD - bRect.top - BOARD_PAD) / unit);
+        const c0 = Math.round((sRect.left + SLOT_PAD - bRect.left - BOARD_PAD) / unit);
         const rows = Math.max(...shape.cells.map(c => c[0])) + 1;
         const cols = Math.max(...shape.cells.map(c => c[1])) + 1;
-
-        const px = e.clientX - dragState.offsetX + dragState.w / 2;
-        const py = e.clientY - dragState.offsetY + dragState.h / 2;
-
-        const c0 = Math.round((px - rect.left - pad - (cols * cs + (cols - 1) * gap) / 2 + cs / 2) / unit);
-        const r0 = Math.round((py - rect.top - pad - (rows * cs + (rows - 1) * gap) / 2 + cs / 2) / unit);
         if (r0 < 0 || c0 < 0 || r0 + rows > N || c0 + cols > N) return null;
+        const p = pieces[dragState.idx];
+        return { r0, c0, shape, color: p.color };
+    }
 
-        const p = pieces[idx];
-        shape.ghostColor0 = p.color[0];
-        shape.ghostColor1 = p.color[1];
-        return { r0, c0, shape };
+    function updateGhost(cx, cy) {
+        clearGhost();
+        const slot = dragState.slot;
+        const w = slot.offsetWidth, h = slot.offsetHeight;
+        if (cx < 0 || cy < 0) return;
+        const t = snapTarget();
+        if (!t) return;
+        let ok = true;
+        for (const [dr, dc] of t.shape.cells) {
+            if (board[t.r0 + dr][t.c0 + dc]) { ok = false; break; }
+        }
+        if (!ok) return;
+        for (const [dr, dc] of t.shape.cells) {
+            const el = boardEl[t.r0 + dr][t.c0 + dc];
+            el.classList.add('ghost');
+            el.style.background = 'linear-gradient(145deg, ' + t.color[0] + ', ' + t.color[1] + ')';
+        }
     }
 
     function clearGhost() {
@@ -599,41 +617,42 @@
         }
     }
 
-    function endDrag(e) {
+    window.addEventListener('pointerup', (e) => {
         if (!dragState) return;
         const { idx, slot } = dragState;
+        const t = snapTarget();
         dragState = null;
         clearGhost();
 
-        const target = snapToBoard(e, idx);
         slot.classList.remove('dragging');
         slot.style.left = slot.style.top = '';
+        piecesRow.insertBefore(slot, piecesRow.children[idx] || null);
 
-        if (!target) return;
-        const { r0, c0, shape } = target;
+        if (!t) return;
         let ok = true;
-        for (const [dr, dc] of shape.cells) {
-            if (r0 + dr >= N || c0 + dc >= N || board[r0 + dr][c0 + dc]) { ok = false; break; }
+        for (const [dr, dc] of t.shape.cells) {
+            if (t.r0 + dr >= N || t.c0 + dc >= N || board[t.r0 + dr][t.c0 + dc]) { ok = false; break; }
         }
         if (!ok) { playSound('cant'); return; }
 
-        const p = pieces[idx];
-        for (const [dr, dc] of shape.cells) {
-            board[r0 + dr][c0 + dc] = p.color;
-            const el = boardEl[r0 + dr][c0 + dc];
+        for (const [dr, dc] of t.shape.cells) {
+            board[t.r0 + dr][t.c0 + dc] = t.color;
+            const el = boardEl[t.r0 + dr][t.c0 + dc];
             el.classList.add('filled');
-            el.style.background = 'linear-gradient(145deg, ' + p.color[0] + ', ' + p.color[1] + ')';
+            el.style.background = 'linear-gradient(145deg, ' + t.color[0] + ', ' + t.color[1] + ')';
         }
         playSound('place');
-        score += shape.cells.length;
-        p.used = true;
+        score += t.shape.cells.length;
+        pieces[idx].used = true;
         slot.classList.add('used');
+        slot.style.position = '';
+        slot.style.width = '';
 
         checkLines();
         updateStats();
         if (pieces.every(pc => pc.used)) refillPieces();
         if (!anyMovePossible()) setTimeout(endGame, 400);
-    }
+    });
 
     function checkLines() {
         const fullRows = [], fullCols = [];
