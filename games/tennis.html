@@ -170,7 +170,36 @@
         .control-btn:hover { transform: translateY(-2px); filter: brightness(1.15); }
 
         .btn-start { background: linear-gradient(135deg, #84cc16, #4d7c0f); }
+        .btn-pause { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
         .btn-music { background: linear-gradient(135deg, #64c8ff, #3b82f6); }
+
+        .pause-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5,3,15,0.82);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 90;
+            display: none;
+        }
+
+        .pause-overlay.show { display: flex; }
+
+        .pause-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.6rem;
+            color: #a78bfa;
+            text-shadow: 0 0 25px rgba(167,139,250,0.8);
+            margin-bottom: 16px;
+        }
+
+        .pause-sub {
+            color: #a0a0c0;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
 
         .instructions {
             background: rgba(255,255,255,0.05);
@@ -305,6 +334,7 @@
 
         <div class="controls">
             <button class="control-btn btn-start" onclick="startGame()">JOGAR</button>
+            <button class="control-btn btn-pause" id="pauseBtn" onclick="togglePause()">⏸ PAUSE</button>
             <button class="control-btn btn-music" id="musicBtn" onclick="toggleMusic()">🔊 MÚSICA</button>
         </div>
 
@@ -318,6 +348,12 @@
         <div class="end-title" id="endTitle">VITÓRIA!</div>
         <div class="end-sub" id="endSub"></div>
         <button class="end-btn" onclick="startGame()">JOGAR DE NOVO</button>
+    </div>
+
+    <div class="pause-overlay" id="pauseOverlay">
+        <div class="pause-title">⏸ PAUSADO</div>
+        <div class="pause-sub">Aperte P ou o botão PAUSE para continuar</div>
+        <button class="end-btn" onclick="togglePause()">CONTINUAR</button>
     </div>
 
     <script>
@@ -410,6 +446,7 @@
 
     let diff = 'easy';
     let state = 'idle';
+    let paused = false;
     let serving = 'player';
     let servingCountdown = 0;
     let hitCooldown = 0;
@@ -460,6 +497,9 @@
         pScore = { points: 0, games: 0 };
         oScore = { points: 0, games: 0 };
         totalPoints = 0;
+        paused = false;
+        document.getElementById('pauseOverlay').classList.remove('show');
+        document.getElementById('pauseBtn').textContent = '⏸ PAUSE';
         loadBest();
         updateScoreUI();
         state = 'play';
@@ -495,6 +535,18 @@
         ball.vz = 5.2;
         ball.active = true;
     }
+
+    function togglePause() {
+        if (state !== 'play') return;
+        paused = !paused;
+        const btn = document.getElementById('pauseBtn');
+        btn.textContent = paused ? '▶ CONTINUAR' : '⏸ PAUSE';
+        document.getElementById('pauseOverlay').classList.toggle('show', paused);
+    }
+
+    window.addEventListener('keydown', e => {
+        if (e.key === 'p' || e.key === 'P') togglePause();
+    });
 
     function showBanner(text, cls, time) {
         const b = document.getElementById('banner');
@@ -598,7 +650,7 @@
     }
 
     function update() {
-        if (state !== 'play') return;
+        if (paused || state !== 'play') return;
 
         if (servingCountdown > 0) {
             servingCountdown--;
