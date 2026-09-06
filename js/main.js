@@ -998,9 +998,9 @@ function openGame(gameId) {
     const game = gamesDatabase.find(g => g.id === gameId);
     if (!game) return;
     
-    // Jogo jogável: abrir em nova aba
+    // Jogo jogável: abrir em nova aba (com versão para quebrar cache)
     if (game.gameFile) {
-        window.open(game.gameFile, '_blank');
+        window.open(game.gameFile + '?v=3', '_blank');
         return;
     }
     

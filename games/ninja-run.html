@@ -218,11 +218,11 @@
 
     // ============ SISTEMA DE ZONAS (desafios por distância) ============
     const zones = [
-        { dist: 0,    name: '🌲 FLORESTA',     pool: ['single', 'single', 'doubleGap'] },
-        { dist: 300,  name: '⛰️ COLINAS',      pool: ['tall', 'shurikenLow', 'single', 'doubleGap'] },
-        { dist: 650,  name: '🏔️ DESFILADEIRO', pool: ['tower', 'combo', 'tall', 'shurikenLow'] },
-        { dist: 1100, name: '⚡ TEMPESTADE',   pool: ['shurikenWave', 'combo', 'tower', 'tall'] },
-        { dist: 1600, name: '🔥 CAOS',         pool: ['combo', 'shurikenWave', 'tower', 'doubleGap', 'tall'] }
+        { dist: 0,    name: '🌲 FLORESTA',     crateColor: '#b45309', pool: ['single', 'single', 'doubleGap'] },
+        { dist: 250,  name: '⛰️ COLINAS',      crateColor: '#64748b', pool: ['tall', 'shurikenLow', 'single', 'doubleGap'] },
+        { dist: 550,  name: '🏔️ DESFILADEIRO', crateColor: '#a855f7', pool: ['tower', 'combo', 'tall', 'shurikenLow'] },
+        { dist: 900,  name: '⚡ TEMPESTADE',   crateColor: '#0ea5e9', pool: ['shurikenWave', 'combo', 'tower', 'tall'] },
+        { dist: 1300, name: '🔥 CAOS',         crateColor: '#dc2626', pool: ['combo', 'shurikenWave', 'tower', 'doubleGap', 'tall'] }
     ];
     let currentZone = 0;
 
@@ -276,7 +276,7 @@
     }
 
     function addCrate(x, w, h, yOff = 0) {
-        obstacles.push({ x, type: 'crate', w, h, y: GROUND - yOff, rot: 0 });
+        obstacles.push({ x, type: 'crate', w, h, y: GROUND - yOff, rot: 0, color: zones[currentZone].crateColor });
     }
     function addShuriken(x, y) {
         obstacles.push({ x, type: 'shuriken', w: 18, h: 18, y, rot: 0 });
@@ -503,10 +503,11 @@
         // Obstáculos
         obstacles.forEach(o => {
             if (o.type === 'crate') {
-                ctx.shadowBlur = 8; ctx.shadowColor = '#f97316';
-                ctx.fillStyle = '#c2410c';
+                const crateMain = o.color || '#c2410c';
+                ctx.shadowBlur = 8; ctx.shadowColor = crateMain;
+                ctx.fillStyle = crateMain;
                 ctx.fillRect(o.x - o.w/2, o.y - o.h, o.w, o.h);
-                ctx.strokeStyle = '#7c2d12'; ctx.lineWidth = 3;
+                ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 3;
                 ctx.strokeRect(o.x - o.w/2, o.y - o.h, o.w, o.h);
                 ctx.beginPath();
                 ctx.moveTo(o.x - o.w/2, o.y - o.h); ctx.lineTo(o.x + o.w/2, o.y);

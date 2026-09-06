@@ -176,6 +176,7 @@
         hard: { gravity: 0.55, jump: -7.5, gap: 115, pipeSpeed: 3.4, spawnEvery: 80 }
     };
 
+    let gs = { playing: false, paused: false, score: 0, difficulty: 'easy', frame: 0 };
     let best = parseInt(localStorage.getItem('flappy_best') || '0');
     document.getElementById('best').textContent = best;
 

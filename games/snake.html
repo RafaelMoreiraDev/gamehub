@@ -180,7 +180,7 @@
     const ctx = canvas.getContext('2d');
     const GRID = 21, CELL = 20;
 
-    const diffSpeed = { easy: 140, medium: 100, hard: 65 };
+    const diffSpeed = { easy: 175, medium: 125, hard: 85 };
     let gs = { playing: false, paused: false, score: 0, difficulty: 'easy', dir: {x:1,y:0}, nextDir: {x:1,y:0}, keysHeld: {} };
     let snake, food, moveTimer = 0, lastTime = 0, particles = [], floatTexts = [], eatBump = 0;
     let best = parseInt(localStorage.getItem('snake_best') || '0');
