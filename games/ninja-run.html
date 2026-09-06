@@ -64,7 +64,30 @@
             cursor: pointer;
         }
         .btn-start { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; }
+        .btn-pause { background: linear-gradient(135deg, #ffe66d, #ccbb5a); color: #0f172a; }
         .btn-reset { background: linear-gradient(135deg, #ff6b6b, #cc5353); color: white; }
+        .btn-music { background: linear-gradient(135deg, #64c8ff, #3b82f6); color: #0f172a; }
+        .zone-banner {
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: #ffe66d;
+            text-shadow: 0 0 25px rgba(255,230,109,0.8);
+            pointer-events: none;
+            opacity: 0;
+            z-index: 5;
+            white-space: nowrap;
+        }
+        .zone-banner.show { animation: zoneFade 2.5s ease forwards; }
+        @keyframes zoneFade {
+            0% { opacity: 0; transform: translate(-50%,-50%) scale(0.5); }
+            15% { opacity: 1; transform: translate(-50%,-50%) scale(1.15); }
+            80% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+            100% { opacity: 0; }
+        }
         .control-btn:hover { transform: translateY(-2px); }
         .control-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .difficulty-selector { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
@@ -133,6 +156,7 @@
             <span>RECORDE: <span class="stat-value best" id="best">0m</span></span>
         </div>
         <canvas id="gameCanvas" width="500" height="300"></canvas>
+        <div class="zone-banner" id="zoneBanner">🌲 FLORESTA</div>
         <div class="game-overlay" id="gameOverOverlay">
             <div class="overlay-title">NINJA CAIU!</div>
             <div class="overlay-stat-value" id="finalScore">0m</div>
@@ -140,10 +164,15 @@
             <div class="new-record" id="newRecord" style="display:none">🏆 NOVO RECORDE!</div>
             <button class="overlay-btn" onclick="startGame()">CORRER NOVAMENTE</button>
         </div>
+        <div class="game-overlay" id="pauseOverlay">
+            <div class="overlay-title" style="color:#ffe66d">PAUSADO</div>
+            <button class="overlay-btn" onclick="togglePause()">CONTINUAR</button>
+        </div>
         <div class="controls">
             <button class="control-btn btn-start" id="startBtn" onclick="startGame()">INICIAR</button>
+            <button class="control-btn btn-pause" id="pauseBtn" onclick="togglePause()" disabled>PAUSAR</button>
             <button class="control-btn btn-reset" onclick="resetGame()">RESETAR</button>
-            <button class="control-btn btn-reset" id="musicBtn" onclick="toggleMusic()">🔊 MÚSICA</button>
+            <button class="control-btn btn-music" id="musicBtn" onclick="toggleMusic()">🔊 MÚSICA</button>
         </div>
         <div class="difficulty-selector">
             <button class="diff-btn easy active" onclick="setDifficulty('easy')">FÁCIL</button>
@@ -152,7 +181,7 @@
         </div>
         <div class="instructions">
             <h3>CONTROLES</h3>
-            <span class="key">ESPAÇO / ↑ / CLIQUE = PULAR (2x no ar!)</span>
+            <span class="key">ESPAÇO / ↑ / CLIQUE = PULAR (2x no ar!)</span> &nbsp; <span class="key">P = Pausar</span>
         </div>
     </div>
 
@@ -183,8 +212,75 @@
             e.preventDefault();
             jump();
         }
+        if ((e.key === 'p' || e.key === 'P') && gs.playing) togglePause();
     });
     canvas.addEventListener('mousedown', jump);
+
+    // ============ SISTEMA DE ZONAS (desafios por distância) ============
+    const zones = [
+        { dist: 0,    name: '🌲 FLORESTA',     pool: ['single', 'single', 'doubleGap'] },
+        { dist: 300,  name: '⛰️ COLINAS',      pool: ['tall', 'shurikenLow', 'single', 'doubleGap'] },
+        { dist: 650,  name: '🏔️ DESFILADEIRO', pool: ['tower', 'combo', 'tall', 'shurikenLow'] },
+        { dist: 1100, name: '⚡ TEMPESTADE',   pool: ['shurikenWave', 'combo', 'tower', 'tall'] },
+        { dist: 1600, name: '🔥 CAOS',         pool: ['combo', 'shurikenWave', 'tower', 'doubleGap', 'tall'] }
+    ];
+    let currentZone = 0;
+
+    function getZoneIndex() {
+        const d = gs.score;
+        let z = 0;
+        for (let i = 0; i < zones.length; i++) if (d >= zones[i].dist) z = i;
+        return z;
+    }
+
+    function showZoneBanner(text) {
+        const banner = document.getElementById('zoneBanner');
+        banner.textContent = text;
+        banner.classList.remove('show');
+        void banner.offsetWidth;
+        banner.classList.add('show');
+    }
+
+    // Padrões de obstáculos (tudo relativo à frente da tela)
+    function spawnPattern(pattern) {
+        const baseX = canvas.width + 40;
+        switch (pattern) {
+            case 'single': // caixa simples
+                addCrate(baseX, 26 + Math.random() * 14, 30 + Math.random() * 12);
+                break;
+            case 'doubleGap': // 2 caixas espaçadas
+                addCrate(baseX, 26, 30);
+                addCrate(baseX + 80 + Math.random() * 40, 26, 30);
+                break;
+            case 'tall': // caixa alta: pulo bem dado ou duplo
+                addCrate(baseX, 32 + Math.random() * 12, 58 + Math.random() * 16);
+                break;
+            case 'tower': // torre de 2-3 caixas
+                addCrate(baseX, 28, 32);
+                addCrate(baseX, 28, 32, 32);
+                if (gs.difficulty !== 'easy' && Math.random() < 0.4) addCrate(baseX, 28, 32, 64);
+                break;
+            case 'shurikenLow': // shuriken rasante
+                addShuriken(baseX, GROUND - 42 - Math.random() * 14);
+                break;
+            case 'shurikenWave': // onda de shurikens em alturas variadas
+                addShuriken(baseX, GROUND - 42 - Math.random() * 18);
+                addShuriken(baseX + 150, GROUND - 60 - Math.random() * 30);
+                if (gs.difficulty !== 'easy') addShuriken(baseX + 300, GROUND - 42 - Math.random() * 18);
+                break;
+            case 'combo': // caixa + shuriken logo depois (pulada dupla)
+                addCrate(baseX, 26, 30);
+                addShuriken(baseX + 120, GROUND - 52 - Math.random() * 20);
+                break;
+        }
+    }
+
+    function addCrate(x, w, h, yOff = 0) {
+        obstacles.push({ x, type: 'crate', w, h, y: GROUND - yOff, rot: 0 });
+    }
+    function addShuriken(x, y) {
+        obstacles.push({ x, type: 'shuriken', w: 18, h: 18, y, rot: 0 });
+    }
 
     function jump() {
         if (!gs.playing) { startGame(); return; }
@@ -213,32 +309,50 @@
 
     function startGame() {
         gs.playing = true;
+        gs.paused = false;
         gs.score = 0; gs.coins = 0; gs.frame = 0;
         speed = diffConfig[gs.difficulty].speed;
         ninja.y = GROUND; ninja.vy = 0; ninja.jumping = false; ninja.doubleJump = false;
         obstacles = []; coins = []; particles = [];
         spawnTimer = 0; coinTimer = 0;
+        currentZone = 0;
         document.getElementById('score').textContent = '0m';
         document.getElementById('coins').textContent = '0';
-        document.getElementById('gameOverOverlay').classList.remove('visible');
+        document.querySelectorAll('.game-overlay').forEach(o => o.classList.remove('visible'));
         document.getElementById('startBtn').disabled = true;
+        document.getElementById('pauseBtn').disabled = false;
+        document.getElementById('pauseBtn').textContent = 'PAUSAR';
+        showZoneBanner(zones[0].name);
         startMusic();
         gameLoop();
     }
 
+    function togglePause() {
+        gs.paused = !gs.paused;
+        document.getElementById('pauseOverlay').classList.toggle('visible', gs.paused);
+        document.getElementById('pauseBtn').textContent = gs.paused ? 'CONTINUAR' : 'PAUSAR';
+        if (audioCtx) { gs.paused ? audioCtx.suspend() : audioCtx.resume(); }
+        if (!gs.paused) gameLoop();
+    }
+
     function resetGame() {
         gs.playing = false;
+        gs.paused = false;
         stopMusic();
         obstacles = []; coins = []; particles = [];
-        document.getElementById('gameOverOverlay').classList.remove('visible');
+        document.querySelectorAll('.game-overlay').forEach(o => o.classList.remove('visible'));
         document.getElementById('startBtn').disabled = false;
+        document.getElementById('pauseBtn').disabled = true;
+        document.getElementById('pauseBtn').textContent = 'PAUSAR';
         draw();
     }
 
     function die() {
         gs.playing = false;
+        gs.paused = false;
         stopMusic();
         playSound('die');
+        document.getElementById('pauseBtn').disabled = true;
         const dist = Math.floor(gs.score);
         const isRecord = dist > best;
         if (isRecord) {
@@ -258,6 +372,14 @@
         gs.score += speed * 0.05;
         speed += 0.0006;
         document.getElementById('score').textContent = Math.floor(gs.score) + 'm';
+
+        // Mudança de zona
+        const z = getZoneIndex();
+        if (z !== currentZone) {
+            currentZone = z;
+            showZoneBanner(zones[z].name);
+            playSound('coin');
+        }
 
         // Física do ninja
         ninja.vy += 0.55;
@@ -279,19 +401,12 @@
             if (h.x < -h.w) { h.x = canvas.width + h.w/2; h.h = 30+Math.random()*45; h.w = 100+Math.random()*80; }
         });
 
-        // Obstáculos
+        // Spawn por padrões da zona atual
         spawnTimer++;
         if (spawnTimer >= cfg.spawnEvery) {
             spawnTimer = 0;
-            const isShuriken = Math.random() < cfg.shurikenChance;
-            obstacles.push({
-                x: canvas.width + 30,
-                type: isShuriken ? 'shuriken' : 'crate',
-                w: isShuriken ? 18 : 26 + Math.random()*18,
-                h: isShuriken ? 18 : 28 + Math.random()*14,
-                y: isShuriken ? GROUND - (40 + Math.random()*50) : GROUND,
-                rot: 0
-            });
+            const pool = zones[currentZone].pool;
+            spawnPattern(pool[Math.floor(Math.random() * pool.length)]);
         }
 
         // Moedas
@@ -322,7 +437,7 @@
             // Colisão (hitbox reduzida para ser justo)
             const nx = ninja.x, ny = ninja.y - 12;
             const oTop = o.type === 'shuriken' ? o.y - o.h/2 : o.y - o.h;
-            const oBottom = o.y;
+            const oBottom = o.type === 'shuriken' ? o.y + o.h/2 : o.y;
             if (nx + 12 > o.x - o.w/2 && nx - 12 < o.x + o.w/2 &&
                 ny + 14 > oTop && ny - 14 < oBottom) {
                 die();
@@ -418,51 +533,107 @@
             ctx.shadowBlur = 0;
         });
 
-        // Ninja
+        // Ninja detalhado
         ctx.save();
         ctx.translate(ninja.x, ninja.y);
-        ctx.shadowBlur = 15; ctx.shadowColor = '#60a5fa';
+        const airborne = ninja.y < GROUND - 2;
+        ctx.rotate(airborne ? Math.max(-0.25, Math.min(0.3, ninja.vy * 0.03)) : 0.06);
+        const run = gs.frame * 0.45;
 
-        // Corpo
-        ctx.fillStyle = '#1e3a5f';
+        // ---- Lenço vermelho esvoaçante (atrás) ----
+        ctx.fillStyle = '#dc2626';
         ctx.beginPath();
-        ctx.roundRect(-11, -30, 22, 30, 8);
+        ctx.moveTo(-6, -24);
+        for (let i = 1; i <= 4; i++) {
+            ctx.lineTo(-10 - i * 8, -26 + Math.sin(gs.frame * 0.2 - i * 0.8) * 4 + (airborne ? -i * 2 : 0));
+        }
+        for (let i = 4; i >= 1; i--) {
+            ctx.lineTo(-10 - i * 8, -20 + Math.sin(gs.frame * 0.2 - i * 0.8) * 4);
+        }
+        ctx.closePath();
         ctx.fill();
 
-        // Faixa vermelha
-        ctx.fillStyle = '#dc2626';
-        ctx.fillRect(-11, -22, 22, 4);
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#60a5fa';
 
-        // Cabeça
+        // ---- Pernas (corrida com joelhos / pose de pulo) ----
+        ctx.strokeStyle = '#16283f';
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        if (airborne) {
+            ctx.beginPath();
+            ctx.moveTo(-3, -2); ctx.lineTo(-8, 8); ctx.lineTo(-2, 12);
+            ctx.moveTo(5, -2); ctx.lineTo(9, 6); ctx.lineTo(4, 10);
+            ctx.stroke();
+        } else {
+            const legPhase = Math.sin(run);
+            ctx.beginPath();
+            ctx.moveTo(-2, 0);
+            ctx.lineTo(-2 + legPhase * 7, -5 + Math.abs(legPhase) * 3);
+            ctx.lineTo(-2 + legPhase * 10, legPhase > 0 ? 9 : 4);
+            ctx.moveTo(3, 0);
+            ctx.lineTo(3 - legPhase * 7, -5 + Math.abs(legPhase) * 3);
+            ctx.lineTo(3 - legPhase * 10, legPhase > 0 ? 4 : 9);
+            ctx.stroke();
+        }
+
+        // ---- Corpo (túnica) + cinto ----
         ctx.fillStyle = '#1e3a5f';
-        ctx.beginPath(); ctx.arc(0, -34, 10, 0, Math.PI*2); ctx.fill();
-        // Máscara
+        ctx.beginPath();
+        ctx.roundRect(-11, -30, 22, 32, 7);
+        ctx.fill();
         ctx.fillStyle = '#0f172a';
-        ctx.fillRect(-10, -34, 20, 8);
-        // Olhos
-        ctx.fillStyle = '#fbbf24';
-        ctx.fillRect(-5, -38, 4, 3);
-        ctx.fillRect(2, -38, 4, 3);
+        ctx.fillRect(-11, -8, 22, 4);
 
-        // Pernas animadas
+        // ---- Espada nas costas ----
+        ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 3.5;
+        ctx.beginPath(); ctx.moveTo(-10, -26); ctx.lineTo(16, -46); ctx.stroke();
+        ctx.strokeStyle = '#b45309'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(-11, -25); ctx.lineTo(-6, -22); ctx.stroke();
+
+        // ---- Braço da frente (balança / estica no pulo) ----
         ctx.strokeStyle = '#1e3a5f'; ctx.lineWidth = 5;
-        const run = Math.sin(gs.frame * 0.4) * 6;
+        const armPhase = airborne ? -4 : Math.sin(run) * 6;
         ctx.beginPath();
-        ctx.moveTo(-3, 0); ctx.lineTo(-3 + run, 10);
-        ctx.moveTo(3, 0); ctx.lineTo(3 - run, 10);
+        ctx.moveTo(4, -22);
+        ctx.lineTo(10, -18 + (airborne ? -6 : armPhase * 0.5));
+        ctx.lineTo(13, -12 + (airborne ? -10 : armPhase));
         ctx.stroke();
 
-        // Espada nas costas
-        ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 3;
+        // ---- Cabeça com capuz pontudo ----
+        ctx.fillStyle = '#1e3a5f';
+        ctx.beginPath(); ctx.arc(2, -36, 10, 0, Math.PI * 2); ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(-8, -28); ctx.lineTo(14, -44);
-        ctx.stroke();
+        ctx.moveTo(-4, -42); ctx.lineTo(-13, -33); ctx.lineTo(-2, -30);
+        ctx.closePath(); ctx.fill();
 
-        // Aura de pulo duplo
+        // Rosto sombreado
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.roundRect(0, -38, 13, 9, 4);
+        ctx.fill();
+
+        // Olhos brilhantes
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillRect(3, -37, 4, 3);
+        ctx.fillRect(9, -37, 4, 3);
+
+        // ---- Faixa da cabeça com ponta esvoaçante ----
+        ctx.fillStyle = '#dc2626';
+        ctx.fillRect(-8, -43, 20, 4);
+        const tail = Math.sin(gs.frame * 0.25) * 4;
+        ctx.beginPath();
+        ctx.moveTo(-8, -43);
+        ctx.lineTo(-21, -41 + tail);
+        ctx.lineTo(-8, -39);
+        ctx.closePath();
+        ctx.fill();
+
+        // ---- Aura de pulo duplo disponível ----
         if (ninja.jumping && !ninja.doubleJump) {
             ctx.strokeStyle = 'rgba(96,165,250,0.4)';
             ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.arc(0, -15, 24, 0, Math.PI*2); ctx.stroke();
+            ctx.beginPath(); ctx.arc(0, -15, 26, 0, Math.PI * 2); ctx.stroke();
         }
 
         ctx.restore();
@@ -478,7 +649,7 @@
     }
 
     function gameLoop() {
-        if (!gs.playing) return;
+        if (!gs.playing || gs.paused) return;
         update();
         draw();
         requestAnimationFrame(gameLoop);

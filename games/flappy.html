@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pássaro Saltador - GameHub</title>
+    <title>Flappy Bird - GameHub</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -65,7 +65,9 @@
             transition: all 0.3s ease;
         }
         .btn-start { background: linear-gradient(135deg, #4facfe, #2d7dd2); color: white; }
+        .btn-pause { background: linear-gradient(135deg, #ffe66d, #ccbb5a); color: #16213e; }
         .btn-reset { background: linear-gradient(135deg, #ff6b6b, #cc5353); color: white; }
+        .btn-music { background: linear-gradient(135deg, #64c8ff, #3b82f6); color: white; }
         .control-btn:hover { transform: translateY(-2px); }
         .control-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .difficulty-selector { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
@@ -128,7 +130,7 @@
 </head>
 <body>
     <div class="game-header">
-        <h1 class="game-title">PÁSSARO SALTADOR</h1>
+        <h1 class="game-title">FLAPPY BIRD</h1>
     </div>
     <div class="game-container">
         <div class="stats-bar">
@@ -143,10 +145,15 @@
             <div class="new-record" id="newRecord" style="display:none">🏆 NOVO RECORDE!</div>
             <button class="overlay-btn" onclick="startGame()">JOGAR NOVAMENTE</button>
         </div>
+        <div class="game-overlay" id="pauseOverlay">
+            <div class="overlay-title" style="color:#ffe66d">PAUSADO</div>
+            <button class="overlay-btn" onclick="togglePause()">CONTINUAR</button>
+        </div>
         <div class="controls">
             <button class="control-btn btn-start" id="startBtn" onclick="startGame()">INICIAR</button>
+            <button class="control-btn btn-pause" id="pauseBtn" onclick="togglePause()" disabled>PAUSAR</button>
             <button class="control-btn btn-reset" onclick="resetGame()">RESETAR</button>
-            <button class="control-btn btn-reset" id="musicBtn" onclick="toggleMusic()">🔊 MÚSICA</button>
+            <button class="control-btn btn-music" id="musicBtn" onclick="toggleMusic()">🔊 MÚSICA</button>
         </div>
         <div class="difficulty-selector">
             <button class="diff-btn easy active" onclick="setDifficulty('easy')">FÁCIL</button>
@@ -155,7 +162,7 @@
         </div>
         <div class="instructions">
             <h3>CONTROLES</h3>
-            <span class="key">CLIQUE / ESPAÇO = PULAR</span>
+            <span class="key">CLIQUE / ESPAÇO = PULAR</span> &nbsp; <span class="key">P = Pausar</span>
         </div>
     </div>
 
@@ -169,14 +176,17 @@
         hard: { gravity: 0.55, jump: -7.5, gap: 115, pipeSpeed: 3.4, spawnEvery: 80 }
     };
 
-    let gs = { playing: false, score: 0, difficulty: 'easy', frame: 0 };
     let best = parseInt(localStorage.getItem('flappy_best') || '0');
     document.getElementById('best').textContent = best;
 
     const bird = { x: 110, y: 250, r: 14, vy: 0, rot: 0 };
     let pipes = [], particles = [], spawnTimer = 0, clouds = [];
+    let trees = [], bushes = [], grassTufts = [];
 
     for (let i = 0; i < 5; i++) clouds.push({ x: Math.random()*420, y: 40+Math.random()*200, s: 0.3+Math.random()*0.4, w: 40+Math.random()*40 });
+    for (let i = 0; i < 5; i++) trees.push({ x: 60 + i*140 + Math.random()*60, h: 55 + Math.random()*35, w: 30 + Math.random()*14 });
+    for (let i = 0; i < 8; i++) bushes.push({ x: i*60 + Math.random()*30, w: 16 + Math.random()*16 });
+    for (let i = 0; i < 30; i++) grassTufts.push({ x: i*15 + Math.random()*8, lean: (Math.random()-0.5)*5 });
 
     function flap() {
         if (!gs.playing) { startGame(); return; }
@@ -190,10 +200,19 @@
         });
     }
 
-    canvas.addEventListener('mousedown', flap);
+    canvas.addEventListener('mousedown', () => { if (!gs.paused) flap(); });
     document.addEventListener('keydown', e => {
-        if (e.key === ' ' || e.key === 'ArrowUp') { e.preventDefault(); flap(); }
+        if (e.key === ' ' || e.key === 'ArrowUp') { e.preventDefault(); if (!gs.paused) flap(); }
+        if ((e.key === 'p' || e.key === 'P') && gs.playing) togglePause();
     });
+
+    function togglePause() {
+        gs.paused = !gs.paused;
+        document.getElementById('pauseOverlay').classList.toggle('visible', gs.paused);
+        document.getElementById('pauseBtn').textContent = gs.paused ? 'CONTINUAR' : 'PAUSAR';
+        if (audioCtx) { gs.paused ? audioCtx.suspend() : audioCtx.resume(); }
+        if (!gs.paused) gameLoop();
+    }
 
     function setDifficulty(d) {
         if (gs.playing) return;
@@ -204,29 +223,37 @@
 
     function startGame() {
         gs.playing = true;
+        gs.paused = false;
         gs.score = 0; gs.frame = 0;
         document.getElementById('score').textContent = 0;
         bird.y = 250; bird.vy = 0; bird.rot = 0;
         pipes = []; particles = []; spawnTimer = 0;
-        document.getElementById('gameOverOverlay').classList.remove('visible');
+        document.querySelectorAll('.game-overlay').forEach(o => o.classList.remove('visible'));
         document.getElementById('startBtn').disabled = true;
+        document.getElementById('pauseBtn').disabled = false;
+        document.getElementById('pauseBtn').textContent = 'PAUSAR';
         startMusic();
         gameLoop();
     }
 
     function resetGame() {
         gs.playing = false;
+        gs.paused = false;
         stopMusic();
         pipes = []; particles = [];
-        document.getElementById('gameOverOverlay').classList.remove('visible');
+        document.querySelectorAll('.game-overlay').forEach(o => o.classList.remove('visible'));
         document.getElementById('startBtn').disabled = false;
+        document.getElementById('pauseBtn').disabled = true;
+        document.getElementById('pauseBtn').textContent = 'PAUSAR';
         drawIdle();
     }
 
     function die() {
         gs.playing = false;
+        gs.paused = false;
         stopMusic();
         playSound('die');
+        document.getElementById('pauseBtn').disabled = true;
         const isRecord = gs.score > best;
         if (isRecord) {
             best = gs.score;
@@ -276,12 +303,22 @@
         });
 
         // Chão e teto
-        if (bird.y + bird.r > canvas.height - 10 || bird.y - bird.r < 0) die();
+        if (bird.y + bird.r > canvas.height - 14 || bird.y - bird.r < 0) die();
 
         // Nuvens
         clouds.forEach(c => {
             c.x -= c.s;
             if (c.x < -c.w) { c.x = canvas.width + c.w; c.y = 40 + Math.random()*200; }
+        });
+
+        // Árvores e arbustos em parallax
+        trees.forEach(t => {
+            t.x -= diffConfig[gs.difficulty].pipeSpeed * 0.35;
+            if (t.x < -40) { t.x = canvas.width + 40 + Math.random()*60; t.h = 55 + Math.random()*35; }
+        });
+        bushes.forEach(b => {
+            b.x -= diffConfig[gs.difficulty].pipeSpeed * 0.6;
+            if (b.x < -30) { b.x = canvas.width + 30 + Math.random()*40; b.w = 16 + Math.random()*16; }
         });
 
         // Partículas
@@ -339,6 +376,27 @@
             ctx.fill();
         });
 
+        // Árvores de fundo (bem atrás)
+        const GROUND_Y = canvas.height - 14;
+        trees.forEach(t => {
+            // Tronco
+            ctx.fillStyle = '#5d4037';
+            ctx.fillRect(t.x - 4, GROUND_Y - t.h, 8, t.h);
+            // Copa (3 círculos)
+            ctx.fillStyle = '#1b5e20';
+            ctx.beginPath(); ctx.arc(t.x, GROUND_Y - t.h - 8, t.w*0.45, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(t.x - t.w*0.3, GROUND_Y - t.h + 4, t.w*0.32, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(t.x + t.w*0.3, GROUND_Y - t.h + 4, t.w*0.32, 0, Math.PI*2); ctx.fill();
+        });
+
+        // Arbustos baixos (meia elipse na linha do chão)
+        bushes.forEach(b => {
+            ctx.fillStyle = '#2e7d32';
+            ctx.beginPath();
+            ctx.ellipse(b.x, GROUND_Y + 1, b.w, b.w*0.5, 0, Math.PI, 0);
+            ctx.fill();
+        });
+
         // Canos
         pipes.forEach(p => {
             ctx.shadowBlur = 10; ctx.shadowColor = '#22c55e';
@@ -352,12 +410,27 @@
             ctx.shadowBlur = 0;
         });
 
-        // Chão
-        ctx.fillStyle = '#333';
-        ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
-        ctx.fillStyle = 'rgba(255,255,255,0.1)';
-        for (let x = (gs.frame * 2) % 30 - 30; x < canvas.width; x += 30) {
-            ctx.fillRect(x, canvas.height - 10, 15, 3);
+        // Chão: terra + camada de grama + tufos
+        ctx.fillStyle = '#4e342e';
+        ctx.fillRect(0, GROUND_Y, canvas.width, 14);
+        ctx.fillStyle = '#2e7d32';
+        ctx.fillRect(0, GROUND_Y, canvas.width, 6);
+        ctx.fillStyle = 'rgba(255,255,255,0.06)';
+        for (let x = (gs.frame * 2) % 24 - 24; x < canvas.width; x += 24) {
+            ctx.fillRect(x, GROUND_Y + 9, 12, 2);
+        }
+        // Tufos de grama
+        ctx.strokeStyle = '#4caf50';
+        ctx.lineWidth = 2;
+        for (const g of grassTufts) {
+            let gx = g.x - (gs.frame * 2) % (canvas.width + 20);
+            if (gx < -10) gx += canvas.width + 20;
+            ctx.beginPath();
+            ctx.moveTo(gx, GROUND_Y + 6);
+            ctx.lineTo(gx + g.lean, GROUND_Y - 2);
+            ctx.moveTo(gx + 3, GROUND_Y + 6);
+            ctx.lineTo(gx + 3 + g.lean, GROUND_Y - 3);
+            ctx.stroke();
         }
 
         // Partículas
@@ -379,7 +452,7 @@
     }
 
     function gameLoop() {
-        if (!gs.playing) return;
+        if (!gs.playing || gs.paused) return;
         update();
         draw();
         requestAnimationFrame(gameLoop);

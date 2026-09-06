@@ -66,6 +66,7 @@
         .btn-start { background: linear-gradient(135deg, #22c55e, #16a34a); color: #0a0a1a; }
         .btn-pause { background: linear-gradient(135deg, #ffe66d, #ccbb5a); color: #0a0a1a; }
         .btn-reset { background: linear-gradient(135deg, #ff6b6b, #cc5353); color: white; }
+        .btn-music { background: linear-gradient(135deg, #64c8ff, #3b82f6); color: #0a0a1a; }
         .control-btn:hover { transform: translateY(-2px); }
         .control-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .difficulty-selector { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
@@ -161,7 +162,7 @@
             <button class="control-btn btn-start" id="startBtn" onclick="startGame()">INICIAR</button>
             <button class="control-btn btn-pause" id="pauseBtn" onclick="togglePause()" disabled>PAUSAR</button>
             <button class="control-btn btn-reset" onclick="resetGame()">RESETAR</button>
-            <button class="control-btn btn-reset" id="musicBtn" onclick="toggleMusic()">🔊 MÚSICA</button>
+            <button class="control-btn btn-music" id="musicBtn" onclick="toggleMusic()">🔊 MÚSICA</button>
         </div>
         <div class="difficulty-selector">
             <button class="diff-btn easy active" onclick="setDifficulty('easy')">FÁCIL</button>
@@ -181,7 +182,7 @@
 
     const diffSpeed = { easy: 140, medium: 100, hard: 65 };
     let gs = { playing: false, paused: false, score: 0, difficulty: 'easy', dir: {x:1,y:0}, nextDir: {x:1,y:0}, keysHeld: {} };
-    let snake, food, moveTimer = 0, lastTime = 0, particles = [];
+    let snake, food, moveTimer = 0, lastTime = 0, particles = [], floatTexts = [], eatBump = 0;
     let best = parseInt(localStorage.getItem('snake_best') || '0');
     document.getElementById('best').textContent = best;
 
@@ -278,15 +279,23 @@
         if (head.x === food.x && head.y === food.y) {
             gs.score += 10;
             document.getElementById('score').textContent = gs.score;
-            for (let i = 0; i < 10; i++) particles.push({
+            eatBump = 1;
+            floatTexts.push({ x: food.x*CELL+10, y: food.y*CELL+6, text: '+10', life: 1 });
+            for (let i = 0; i < 14; i++) particles.push({
                 x: food.x*CELL+10, y: food.y*CELL+10,
-                dx:(Math.random()-.5)*6, dy:(Math.random()-.5)*6,
-                r: 3, color: '#ff6b6b', life: 1
+                dx:(Math.random()-.5)*7, dy:(Math.random()-.5)*7,
+                r: 2 + Math.random()*2.5, color: i % 3 === 0 ? '#ffe66d' : '#ff6b6b', life: 1
             });
             playSound('eat');
             placeFood();
         } else {
             snake.pop();
+        }
+
+        // Bocado viajando pela cobra
+        if (eatBump > 0) {
+            eatBump++;
+            if (eatBump >= snake.length) eatBump = 0;
         }
     }
 
@@ -327,10 +336,18 @@
         // Snake
         snake.forEach((s, i) => {
             const t = i / snake.length;
-            ctx.shadowColor = i === 0 ? '#4ade80' : `rgba(34,197,94,${1-t*0.6})`;
-            ctx.fillStyle = i === 0 ? '#4ade80' : `rgba(34,197,94,${1-t*0.6})`;
+            let radius = i === 0 ? 6 : 4;
+            let grow = 0;
+            let color = i === 0 ? '#4ade80' : `rgba(34,197,94,${1-t*0.6})`;
+            // Bocado: segmento "inchado" com a maçã passando por dentro
+            if (eatBump > 0 && i === eatBump) {
+                grow = 3;
+                color = '#a3e635';
+            }
+            ctx.shadowColor = color;
+            ctx.fillStyle = color;
             ctx.beginPath();
-            ctx.roundRect(s.x*CELL+1, s.y*CELL+1, CELL-2, CELL-2, i===0 ? 6 : 4);
+            ctx.roundRect(s.x*CELL+1-grow/2, s.y*CELL+1-grow/2, CELL-2+grow, CELL-2+grow, radius);
             ctx.fill();
         });
 
@@ -351,6 +368,18 @@
             p.x += p.dx; p.y += p.dy; p.life -= 0.05;
             ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
             ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+        });
+        ctx.globalAlpha = 1;
+
+        // Texto flutuante (+10)
+        floatTexts = floatTexts.filter(f => f.life > 0);
+        floatTexts.forEach(f => {
+            f.y -= 0.7; f.life -= 0.025;
+            ctx.globalAlpha = Math.min(1, f.life * 2.5);
+            ctx.fillStyle = '#ffe66d';
+            ctx.font = 'bold 15px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(f.text, f.x, f.y);
         });
         ctx.globalAlpha = 1;
     }

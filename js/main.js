@@ -726,7 +726,7 @@ const gamesDatabase = [
     },
     {
         id: 24,
-        title: "Pássaro Saltador",
+        title: "Flappy Bird",
         category: "acao",
         icon: "🐦",
         rating: 4.5,
