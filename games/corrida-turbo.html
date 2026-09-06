@@ -477,9 +477,9 @@
             tilt: 0
         };
         rivals = [
-            { name: 'FÚRIA',   color: '#ef4444', z: 30,  speed: 170, target: 0, lane: ROAD_X + ROAD_W * 0.2 },
-            { name: 'TITÃ',    color: '#f59e0b', z: 15,  speed: 170, target: 0, lane: ROAD_X + ROAD_W * 0.5 },
-            { name: 'VESPA',   color: '#22c55e', z: 45,  speed: 170, target: 0, lane: ROAD_X + ROAD_W * 0.8 }
+            { name: 'FÚRIA',   color: '#ef4444', z: 30,  speed: 170, target: 0, lane: ROAD_X + ROAD_W * 0.2, laneIndex: 0 },
+            { name: 'TITÃ',    color: '#f59e0b', z: 15,  speed: 170, target: 0, lane: ROAD_X + ROAD_W * 0.5, laneIndex: 1 },
+            { name: 'VESPA',   color: '#22c55e', z: 45,  speed: 170, target: 0, lane: ROAD_X + ROAD_W * 0.8, laneIndex: 2 }
         ];
         traffic = [];
         pickups = [];
@@ -536,19 +536,36 @@
         const m = DIFFS[diff];
         if (Math.random() < 0.9 * m.traffic * 0.05) {
             const lane = Math.floor(Math.random() * 3);
-            traffic.push({
-                x: laneX(lane) + (Math.random() - 0.5) * 20,
-                z: player.z + 1200,
-                speed: 120 + Math.random() * 120,
-                color: ['#64748b', '#94a3b8', '#475569', '#f472b6', '#38bdf8'][Math.floor(Math.random() * 5)],
-                truck: Math.random() < 0.25
-            });
+            const x = laneX(lane) + (Math.random() - 0.5) * 16;
+            const z = player.z + 1200 + Math.random() * 300;
+            let free = true;
+            for (const t of traffic) {
+                if (Math.abs(t.x - x) < 55 && Math.abs(t.z - z) < 190) { free = false; break; }
+            }
+            if (free) {
+                for (const pk of pickups) {
+                    if (Math.abs(pk.x - x) < 55 && Math.abs(pk.z - z) < 140) { free = false; break; }
+                }
+            }
+            if (free) {
+                traffic.push({
+                    x: x,
+                    z: z,
+                    speed: 120 + Math.random() * 120,
+                    color: ['#64748b', '#94a3b8', '#475569', '#f472b6', '#38bdf8'][Math.floor(Math.random() * 5)],
+                    truck: Math.random() < 0.25
+                });
+            }
         }
         if (Math.random() < 0.004 * DIFFS[diff].nitroDrops) {
-            pickups.push({
-                x: laneX(Math.floor(Math.random() * 3)),
-                z: player.z + 1200
-            });
+            const lane = Math.floor(Math.random() * 3);
+            const x = laneX(lane);
+            const z = player.z + 1200 + Math.random() * 300;
+            let free = true;
+            for (const t of traffic) {
+                if (Math.abs(t.x - x) < 55 && Math.abs(t.z - z) < 170) { free = false; break; }
+            }
+            if (free) pickups.push({ x: x, z: z });
         }
     }
 
@@ -648,6 +665,16 @@
             }
         }
 
+        for (let lane = 0; lane < 3; lane++) {
+            const lx = laneX(lane);
+            const laneCars = traffic.filter(t => Math.abs(t.x - lx) < 60).sort((a, b) => a.z - b.z);
+            for (let i = 1; i < laneCars.length; i++) {
+                if (laneCars[i].z - laneCars[i - 1].z < 75) {
+                    laneCars[i - 1].speed = Math.min(laneCars[i - 1].speed, laneCars[i].speed);
+                }
+            }
+        }
+
         for (let i = pickups.length - 1; i >= 0; i--) {
             const pk = pickups[i];
             if (Math.abs(pk.z - p.z) < 36 && Math.abs(pk.x - p.x) < 46) {
@@ -674,9 +701,50 @@
             else r.target = p.speed * (DIFFS[diff].aiSpeed + (r.name === 'VESPA' ? 0.04 : r.name === 'FÚRIA' ? 0.02 : 0)) * (0.94 + Math.random() * 0.12);
             r.speed += (r.target - r.speed) * Math.min(1, dt * 1.5);
             r.speed = Math.max(60, r.speed);
+
+            let blocked = false;
+            for (const t of traffic) {
+                const rel = t.z - r.z;
+                if (rel > 10 && rel < 240 && Math.abs(t.x - r.x) < 55) { blocked = true; break; }
+            }
+            if (blocked) {
+                let best = r.laneIndex;
+                let bestScore = -1;
+                for (const l of [0, 1, 2]) {
+                    if (l === r.laneIndex) continue;
+                    const lx = laneX(l);
+                    let minDist = 1e9;
+                    for (const t of traffic) {
+                        if (Math.abs(t.z - r.z) < 320) minDist = Math.min(minDist, Math.abs(t.x - lx));
+                    }
+                    const score = Math.min(minDist, 250);
+                    if (score > bestScore) { bestScore = score; best = l; }
+                }
+                r.laneIndex = best;
+                r.lane = laneX(best);
+            } else {
+                for (const t of traffic) {
+                    const rel = t.z - r.z;
+                    if (rel > -10 && rel < 60 && Math.abs(t.x - r.x) < 46) {
+                        r.speed = Math.min(r.speed, t.speed * 0.95);
+                        break;
+                    }
+                }
+            }
+
             r.z += r.speed * dt;
-            r.x = r.lane + Math.sin(r.z / 220 + (r.name === 'TITÃ' ? 2 : 0)) * 30;
+            const targetX = r.lane + Math.sin(r.z / 220 + (r.name === 'TITÃ' ? 2 : 0)) * 22;
+            r.x += (targetX - r.x) * Math.min(1, dt * 4);
             r.x = Math.max(ROAD_X + 24, Math.min(ROAD_X + ROAD_W - 24, r.x));
+
+            if (Math.abs(r.z - p.z) < 34 && Math.abs(r.x - p.x) < 44) {
+                p.speed *= 0.93;
+                r.speed *= 0.8;
+                const push = Math.sign(p.x - r.x) || 1;
+                p.x += push * 60 * dt;
+                r.x -= push * 60 * dt;
+                shake = Math.max(shake, 4);
+            }
         }
 
         updateStatsHud();
