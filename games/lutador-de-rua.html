@@ -950,28 +950,58 @@
         ctx.ellipse(fx, GROUND - 4, 34, 9, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        const legSpread = f.state === 'idle' || f.state === 'block' ? 12 : 18;
-        const walk = f.state === 'idle' ? Math.sin(f.walkPhase) * 3 : 0;
+        const kicking = f.state === 'kick';
+        const airborne = f.y > 0;
+        const legSpread = (f.state === 'idle' || f.state === 'block') && !airborne ? 12 : 18;
+        const walk = (f.state === 'idle' && !airborne) ? Math.sin(f.walkPhase) * 3 : 0;
+        const hipY = fy + 22;
+        const footY = Math.min(fy + (airborne ? 42 : 64), GROUND - 6);
         ctx.strokeStyle = d.color2;
         ctx.lineWidth = 9;
         ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(fx - 4, fy + 22);
-        ctx.lineTo(fx - legSpread, GROUND - 6 + walk);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(fx + 4, fy + 22);
-        ctx.lineTo(fx + legSpread, GROUND - 6 - walk);
-        ctx.stroke();
+        if (kicking) {
+            const backSign = -facing;
+            ctx.beginPath();
+            ctx.moveTo(fx + backSign * 4, hipY);
+            ctx.lineTo(fx + backSign * (legSpread + 4), footY - 4);
+            ctx.stroke();
+            ctx.fillStyle = '#111827';
+            ctx.beginPath();
+            ctx.arc(fx + backSign * (legSpread + 4), footY - 4, 5, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (airborne) {
+            ctx.beginPath();
+            ctx.moveTo(fx - 4, hipY);
+            ctx.lineTo(fx - legSpread - 5, footY + 6);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(fx + 4, hipY);
+            ctx.lineTo(fx + legSpread + 5, footY + 6);
+            ctx.stroke();
+            ctx.fillStyle = '#111827';
+            ctx.beginPath(); ctx.arc(fx - legSpread - 6, footY + 6, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(fx + legSpread + 6, footY + 6, 5, 0, Math.PI * 2); ctx.fill();
+        } else {
+            ctx.beginPath();
+            ctx.moveTo(fx - 4, hipY);
+            ctx.lineTo(fx - legSpread, footY + walk);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(fx + 4, hipY);
+            ctx.lineTo(fx + legSpread, footY - walk);
+            ctx.stroke();
+            ctx.fillStyle = '#111827';
+            ctx.beginPath(); ctx.arc(fx - legSpread - 2, footY + walk, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(fx + legSpread + 2, footY - walk, 5, 0, Math.PI * 2); ctx.fill();
+        }
 
-        const kicking = f.state === 'kick';
         if (kicking) {
             const prog = 1 - (f.stateT / 0.4);
             const ext = Math.sin(Math.min(1, prog / 0.6) * Math.PI) * (d.kick[1] * 0.75);
             const kneeX = fx + facing * (14 + ext * 0.45);
             const kneeY = fy + 14;
             const footX = fx + facing * (16 + ext);
-            const footY = fy + 8;
+            const footYk = fy + 8;
             ctx.strokeStyle = d.color2;
             ctx.lineWidth = 11;
             ctx.beginPath();
@@ -982,11 +1012,11 @@
             ctx.lineWidth = 8;
             ctx.beginPath();
             ctx.moveTo(kneeX, kneeY);
-            ctx.lineTo(footX, footY);
+            ctx.lineTo(footX, footYk);
             ctx.stroke();
             ctx.fillStyle = '#111827';
             ctx.beginPath();
-            ctx.arc(footX + facing * 5, footY - 2, 6, 0, Math.PI * 2);
+            ctx.arc(footX + facing * 5, footYk - 2, 6, 0, Math.PI * 2);
             ctx.fill();
         }
 
