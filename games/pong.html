@@ -354,9 +354,31 @@
                 flex-wrap: wrap;
             }
         }
+
+        .back-home {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            background: rgba(255,255,255,0.1);
+            color: #a0a0a0;
+            padding: 7px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(6px);
+        }
+        .back-home:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
+    <a href="../index.html" class="back-home" title="Voltar ao GameHub">🏠 Início</a>
     <div class="game-header">
         <h1 class="game-title">PONG</h1>
         <p class="game-subtitle">O clássico jogo de tênis de mesa</p>
