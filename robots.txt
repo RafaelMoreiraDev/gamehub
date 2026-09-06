@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rafaelmoreiradev.github.io/gamehub/sitemap.xml
+Sitemap: https://gamehubjogos.com.br/sitemap.xml

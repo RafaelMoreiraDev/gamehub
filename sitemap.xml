@@ -1,67 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://rafaelmoreiradev.github.io/gamehub/</loc>
+        <loc>https://gamehubjogos.com.br/</loc>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>https://rafaelmoreiradev.github.io/gamehub/politica-de-privacidade.html</loc>
+        <loc>https://gamehubjogos.com.br/politica-de-privacidade.html</loc>
         <changefreq>monthly</changefreq>
         <priority>0.3</priority>
     </url>
     <url>
-        <loc>https://rafaelmoreiradev.github.io/gamehub/termos-de-uso.html</loc>
+        <loc>https://gamehubjogos.com.br/termos-de-uso.html</loc>
         <changefreq>monthly</changefreq>
         <priority>0.3</priority>
     </url>
     <url>
-        <loc>https://rafaelmoreiradev.github.io/gamehub/games/space-invaders.html</loc>
+        <loc>https://gamehubjogos.com.br/games/space-invaders.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://rafaelmoreiradev.github.io/gamehub/games/pong.html</loc>
+        <loc>https://gamehubjogos.com.br/games/pong.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://rafaelmoreiradev.github.io/gamehub/games/quiz.html</loc>
+        <loc>https://gamehubjogos.com.br/games/quiz.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://rafaelmoreiradev.github.io/gamehub/games/memory.html</loc>
+        <loc>https://gamehubjogos.com.br/games/memory.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://rafaelmoreiradev.github.io/gamehub/games/zombie-survival.html</loc>
+        <loc>https://gamehubjogos.com.br/games/zombie-survival.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://rafaelmoreiradev.github.io/gamehub/games/crazy-racing.html</loc>
+        <loc>https://gamehubjogos.com.br/games/crazy-racing.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://rafaelmoreiradev.github.io/gamehub/games/dragon-quest.html</loc>
+        <loc>https://gamehubjogos.com.br/games/dragon-quest.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://rafaelmoreiradev.github.io/gamehub/games/snake.html</loc>
+        <loc>https://gamehubjogos.com.br/games/snake.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://rafaelmoreiradev.github.io/gamehub/games/flappy.html</loc>
+        <loc>https://gamehubjogos.com.br/games/flappy.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
-        <loc>https://rafaelmoreiradev.github.io/gamehub/games/ninja-run.html</loc>
+        <loc>https://gamehubjogos.com.br/games/ninja-run.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>

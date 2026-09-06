@@ -902,7 +902,7 @@ function animateNumber(elementId, target) {
     
     function update(currentTime) {
         const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
+        const progress = Math.min(Math.max(elapsed / duration, 0), 1);
         const easeOut = 1 - Math.pow(1 - progress, 3);
         const current = Math.floor(start + (target - start) * easeOut);
         
@@ -910,6 +910,8 @@ function animateNumber(elementId, target) {
         
         if (progress < 1) {
             requestAnimationFrame(update);
+        } else {
+            element.textContent = formatNumber(target);
         }
     }
     
