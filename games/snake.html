@@ -30,7 +30,7 @@
             border-radius: 15px;
             padding: 12px;
             box-shadow: 0 0 50px rgba(34,197,94,0.3);
-            max-width: 500px;
+            max-width: 660px;
             width: 100%;
             position: relative;
         }
@@ -137,10 +137,8 @@
         }
 
         .back-home {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 100;
+            align-self: flex-start;
+            display: inline-block;
             background: rgba(255,255,255,0.1);
             color: #a0a0a0;
             padding: 7px 14px;
@@ -149,7 +147,7 @@
             font-size: 0.8rem;
             font-weight: 500;
             transition: all 0.2s ease;
-            backdrop-filter: blur(6px);
+            margin: 0 0 5px 5px;
         }
         .back-home:hover {
             background: rgba(255,255,255,0.2);
@@ -168,7 +166,7 @@
             <span>SCORE: <span class="stat-value" id="score">0</span></span>
             <span>RECORDE: <span class="stat-value best" id="best">0</span></span>
         </div>
-        <canvas id="gameCanvas" width="420" height="420"></canvas>
+        <canvas id="gameCanvas" width="600" height="600"></canvas>
         <div class="game-overlay" id="gameOverOverlay">
             <div class="overlay-title gameover">GAME OVER</div>
             <div class="overlay-stat-value" id="finalScore">0</div>
@@ -200,7 +198,7 @@
     <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const GRID = 21, CELL = 20;
+    const GRID = 25, CELL = 24;
 
     const diffSpeed = { easy: 175, medium: 125, hard: 85 };
     let gs = { playing: false, paused: false, score: 0, difficulty: 'easy', dir: {x:1,y:0}, nextDir: {x:1,y:0}, keysHeld: {} };
@@ -209,7 +207,7 @@
     document.getElementById('best').textContent = best;
 
     function resetSnake() {
-        snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+        snake = [{x:12,y:12},{x:11,y:12},{x:10,y:12}];
         gs.dir = {x:1,y:0}; gs.nextDir = {x:1,y:0};
         gs.score = 0;
         document.getElementById('score').textContent = 0;
