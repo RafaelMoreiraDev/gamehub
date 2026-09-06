@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://gamehub.example.com/sitemap.xml
+Sitemap: https://rafaelmoreiradev.github.io/gamehub/sitemap.xml
