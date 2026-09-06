@@ -81,7 +81,7 @@
             border-radius: 16px;
             padding: 18px;
             box-shadow: 0 0 50px rgba(124,58,237,0.25), inset 0 0 30px rgba(0,0,0,0.4);
-            max-width: 560px;
+            max-width: 680px;
             width: 100%;
             position: relative;
         }
@@ -318,7 +318,7 @@
         </div>
 
         <div class="canvas-wrap">
-            <canvas id="board" width="480" height="620"></canvas>
+            <canvas id="board" width="600" height="760"></canvas>
             <div class="pause-overlay" id="pauseOverlay">
                 <div class="pause-title">PAUSADO</div>
                 <div class="pause-sub">Pressione P ou o botão para continuar</div>
@@ -414,9 +414,9 @@
         hard:   { traffic: 1.1,  aiSpeed: 1.0,  finish: 1600, nitroDrops: 0.8 }
     };
 
-    const W = 480;
-    const H = 620;
-    const ROAD_W = 340;
+    const W = 600;
+    const H = 760;
+    const ROAD_W = 400;
     const ROAD_X = (W - ROAD_W) / 2;
 
     const canvas = document.getElementById('board');
@@ -468,7 +468,7 @@
             x: W / 2,
             z: 0,
             speed: 0,
-            maxSpeed: 400,
+            maxSpeed: 430,
             nitro: 60,
             nitroActive: false,
             invuln: 0,
@@ -537,7 +537,7 @@
             const lane = Math.floor(Math.random() * 3);
             traffic.push({
                 x: laneX(lane) + (Math.random() - 0.5) * 20,
-                z: player.z + 700,
+                z: player.z + 800,
                 speed: 120 + Math.random() * 120,
                 color: ['#64748b', '#94a3b8', '#475569', '#f472b6', '#38bdf8'][Math.floor(Math.random() * 5)],
                 truck: Math.random() < 0.25
@@ -546,7 +546,7 @@
         if (Math.random() < 0.004 * DIFFS[diff].nitroDrops) {
             pickups.push({
                 x: laneX(Math.floor(Math.random() * 3)),
-                z: player.z + 700
+                z: player.z + 800
             });
         }
     }
@@ -595,7 +595,7 @@
                 });
             }
         }
-        const cap = p.nitroActive ? 640 : p.maxSpeed;
+        const cap = p.nitroActive ? 680 : p.maxSpeed;
         if (accel) p.speed += (p.nitroActive ? 500 : 220) * dt;
         else p.speed -= 130 * dt;
         if (brake) p.speed -= 400 * dt;
@@ -630,7 +630,7 @@
             t.z += t.speed * dt;
             const rel = t.z - p.z;
             if (rel < -80) { traffic.splice(i, 1); continue; }
-            if (Math.abs(rel) < 30 && Math.abs(t.x - p.x) < 40 && p.invuln <= 0) {
+            if (Math.abs(rel) < 36 && Math.abs(t.x - p.x) < 48 && p.invuln <= 0) {
                 p.speed *= 0.35;
                 p.invuln = 1.2;
                 p.flash = 1;
@@ -649,7 +649,7 @@
 
         for (let i = pickups.length - 1; i >= 0; i--) {
             const pk = pickups[i];
-            if (Math.abs(pk.z - p.z) < 30 && Math.abs(pk.x - p.x) < 40) {
+            if (Math.abs(pk.z - p.z) < 36 && Math.abs(pk.x - p.x) < 46) {
                 p.nitro = Math.min(100, p.nitro + 35);
                 playSound('pickup');
                 for (let j = 0; j < 10; j++) {
@@ -734,7 +734,7 @@
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(tilt || 0);
-        const w = 44, h = 70;
+        const w = 52, h = 80;
         ctx.fillStyle = 'rgba(0,0,0,0.4)';
         ctx.beginPath();
         ctx.ellipse(0, h * 0.42, w * 0.55, 8, 0, 0, Math.PI * 2);

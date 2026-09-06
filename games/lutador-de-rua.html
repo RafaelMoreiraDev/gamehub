@@ -661,7 +661,7 @@
     function updatePlayerInput(dt) {
         const f = player;
         const busy = f.state === 'punch' || f.state === 'kick' || f.state === 'special' || f.state === 'hit';
-        if (busy || f.y < 0) return;
+        if (busy || f.y > 0) return;
         if (keys['s'] || keys['arrowdown']) {
             f.state = 'block';
             return;
@@ -675,9 +675,8 @@
             f.walkPhase += dt * 10;
         }
         f.x = Math.max(50, Math.min(W - 50, f.x));
-        if (keys['w'] || keys['arrowup']) {
+        if ((keys['w'] || keys['arrowup']) && f.y === 0 && f.vy === 0) {
             f.vy = 340;
-            f.y = -0.01;
         }
         if (keys['j']) tryAttack(f, 'punch');
         else if (keys['k']) tryAttack(f, 'kick');
@@ -709,7 +708,7 @@
         cpuThink -= dt;
         const f = cpu;
         const busy = f.state === 'punch' || f.state === 'kick' || f.state === 'special' || f.state === 'hit';
-        if (busy || f.y < 0) return;
+        if (busy || f.y > 0) return;
 
         const dist = Math.abs(player.x - f.x);
         const dir = Math.sign(player.x - f.x);
@@ -749,10 +748,10 @@
     function updateFighter(f, dt) {
         f.flash = Math.max(0, f.flash - dt * 4);
         f.invuln = Math.max(0, f.invuln - dt);
-        if (f.y < 0 || f.vy !== 0) {
+        if (f.y > 0 || f.vy !== 0) {
             f.vy -= 900 * dt;
             f.y += f.vy * dt;
-            if (f.y >= 0) { f.y = 0; f.vy = 0; }
+            if (f.y <= 0) { f.y = 0; f.vy = 0; }
         }
         if (f.state === 'punch' || f.state === 'kick' || f.state === 'special') {
             f.stateT -= dt;
@@ -771,10 +770,10 @@
 
     function updateFighterPhysics(f, dt) {
         f.flash = Math.max(0, f.flash - dt * 4);
-        if (f.y < 0) {
+        if (f.y > 0 || f.vy !== 0) {
             f.vy -= 900 * dt;
             f.y += f.vy * dt;
-            if (f.y >= 0) { f.y = 0; f.vy = 0; }
+            if (f.y <= 0) { f.y = 0; f.vy = 0; }
         }
     }
 
@@ -969,12 +968,26 @@
         if (kicking) {
             const prog = 1 - (f.stateT / 0.4);
             const ext = Math.sin(Math.min(1, prog / 0.6) * Math.PI) * (d.kick[1] * 0.75);
-            ctx.strokeStyle = d.color;
+            const kneeX = fx + facing * (14 + ext * 0.45);
+            const kneeY = fy + 14;
+            const footX = fx + facing * (16 + ext);
+            const footY = fy + 8;
+            ctx.strokeStyle = d.color2;
             ctx.lineWidth = 11;
             ctx.beginPath();
-            ctx.moveTo(fx, fy + 30);
-            ctx.lineTo(fx + facing * (18 + ext), fy + 26);
+            ctx.moveTo(fx, fy + 26);
+            ctx.lineTo(kneeX, kneeY);
             ctx.stroke();
+            ctx.strokeStyle = d.color;
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.moveTo(kneeX, kneeY);
+            ctx.lineTo(footX, footY);
+            ctx.stroke();
+            ctx.fillStyle = '#111827';
+            ctx.beginPath();
+            ctx.arc(footX + facing * 5, footY - 2, 6, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         const torsoGrad = ctx.createLinearGradient(fx, fy - 20, fx, fy + 30);
