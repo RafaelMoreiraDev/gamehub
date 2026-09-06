@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lutador de Rua - GameHub</title>
+    <meta name="description" content="Jogue Lutador de Rua online grátis! Jogo de luta 1v1 estilo arcade: socos, chutes, golpes especiais e melhor de 3 rounds contra a CPU. Sem download!">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%8E%AE</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a2e 50%, #24243e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Roboto', sans-serif;
+            color: white;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .game-header {
+            position: relative;
+            padding-left: 100px;
+            padding-right: 100px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .back-home {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.1);
+            color: #a0a0a0;
+            padding: 7px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .back-home:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, #f97316, #fbbf24, #ef4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+            animation: glow 2.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 5px rgba(249,115,22,0.6)); }
+            to { filter: drop-shadow(0 0 22px rgba(251,191,36,0.8)); }
+        }
+
+        .game-subtitle {
+            color: #a0a0c0;
+            font-size: 0.85rem;
+        }
+
+        .game-container {
+            background: rgba(0,0,0,0.5);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 0 50px rgba(249,115,22,0.25), inset 0 0 30px rgba(0,0,0,0.4);
+            max-width: 850px;
+            width: 100%;
+            position: relative;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 14px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .stat-item { text-align: center; }
+
+        .stat-label {
+            font-size: 0.55rem;
+            color: #a0a0c0;
+            margin-bottom: 6px;
+        }
+
+        .stat-value { font-size: 1rem; color: #fdba74; }
+        .stat-value.best { color: #fbbf24; font-size: 0.85rem; }
+
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .diff-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            padding: 10px 14px;
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            color: #a0a0c0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .diff-btn:hover { border-color: #f97316; color: white; }
+
+        .diff-btn.easy.active { border-color: #22c55e; background: rgba(34,197,94,0.2); color: #86efac; }
+        .diff-btn.medium.active { border-color: #fbbf24; background: rgba(251,191,36,0.2); color: #fde68a; }
+        .diff-btn.hard.active { border-color: #ef4444; background: rgba(239,68,68,0.2); color: #fca5a5; }
+
+        .char-select {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .char-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 128px;
+        }
+
+        .char-card:hover {
+            transform: translateY(-4px);
+            border-color: #f97316;
+            box-shadow: 0 8px 25px rgba(249,115,22,0.35);
+        }
+
+        .char-emoji { font-size: 2.4rem; display: block; margin-bottom: 8px; }
+
+        .char-name {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: #fdba74;
+            margin-bottom: 6px;
+        }
+
+        .char-desc { font-size: 0.72rem; color: #a0a0c0; line-height: 1.4; }
+
+        .canvas-wrap {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+
+        #board {
+            border-radius: 12px;
+            background: #1a1024;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+            max-width: 100%;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.65rem;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover { transform: translateY(-2px); filter: brightness(1.15); }
+
+        .btn-start { background: linear-gradient(135deg, #f97316, #c2410c); }
+        .btn-music { background: linear-gradient(135deg, #64c8ff, #3b82f6); }
+        .btn-pause { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
+        .btn-pause.paused {
+            background: linear-gradient(135deg, #fbbf24, #d97706);
+            box-shadow: 0 0 18px rgba(251,191,36,0.6);
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .instructions h3 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            color: #f97316;
+            margin-bottom: 8px;
+        }
+
+        .instructions p {
+            color: #a0a0c0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .pause-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(5,3,15,0.82);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .pause-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .pause-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.4rem;
+            color: #fbbf24;
+            margin-bottom: 12px;
+            text-shadow: 0 0 20px rgba(251,191,36,0.7);
+        }
+
+        .pause-sub {
+            color: #a0a0c0;
+            font-size: 0.9rem;
+        }
+
+        .end-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5,3,15,0.88);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .end-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .end-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.7rem;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        .end-title.win {
+            background: linear-gradient(90deg, #fbbf24, #f97316, #ef4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+
+        .end-title.lose { color: #ef4444; text-shadow: 0 0 25px rgba(239,68,68,0.8); }
+
+        .end-sub {
+            color: #c4b5fd;
+            font-size: 1rem;
+            margin-bottom: 24px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .end-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.75rem;
+            padding: 14px 26px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f97316, #8b5cf6);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .end-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(249,115,22,0.5); }
+
+        @media (max-width: 600px) {
+            .game-title { font-size: 1.2rem; }
+            .game-header { padding-left: 80px; padding-right: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <a href="../index.html" class="back-home" title="Voltar ao GameHub">🏠 Início</a>
+        <h1 class="game-title">LUTADOR DE RUA</h1>
+        <p class="game-subtitle">Melhor de 3 rounds. Só vale porrada! 🥊</p>
+    </div>
+
+    <div class="game-container">
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-label">VITÓRIAS</div>
+                <div class="stat-value" id="winsVal">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">RECORDE</div>
+                <div class="stat-value best" id="streakVal">--</div>
+            </div>
+        </div>
+
+        <div class="difficulty-selector">
+            <button class="diff-btn easy active" onclick="setDifficulty('easy')">FÁCIL</button>
+            <button class="diff-btn medium" onclick="setDifficulty('medium')">MÉDIO</button>
+            <button class="diff-btn hard" onclick="setDifficulty('hard')">DIFÍCIL</button>
+        </div>
+
+        <div class="char-select" id="charSelect">
+            <div class="char-card" onclick="startGame('rex')">
+                <span class="char-emoji">🥊</span>
+                <div class="char-name">REX</div>
+                <div class="char-desc">Equilibrado.<br>Soco forte e bola de fogo</div>
+            </div>
+            <div class="char-card" onclick="startGame('kobra')">
+                <span class="char-emoji">🐍</span>
+                <div class="char-name">KOBRA</div>
+                <div class="char-desc">Rápida e ágil.<br>Golpes velozes</div>
+            </div>
+            <div class="char-card" onclick="startGame('bronco')">
+                <span class="char-emoji">🗿</span>
+                <div class="char-name">BRONCO</div>
+                <div class="char-desc">Lento e brutal.<br>Muita vida, dano forte</div>
+            </div>
+        </div>
+
+        <div class="canvas-wrap">
+            <canvas id="board" width="800" height="450"></canvas>
+            <div class="pause-overlay" id="pauseOverlay">
+                <div class="pause-title">PAUSADO</div>
+                <div class="pause-sub">Pressione P ou o botão para continuar</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn btn-start" id="startBtn" onclick="backToSelect()">TROCAR LUTADOR</button>
+            <button class="control-btn btn-pause" id="pauseBtn" onclick="togglePause()" style="display:none;">⏸ PAUSA (P)</button>
+            <button class="control-btn btn-music" id="musicBtn" onclick="toggleMusic()">🔊 MÚSICA</button>
+        </div>
+
+        <div class="instructions">
+            <h3>COMO JOGAR</h3>
+            <p><b>A/D</b> ou setas: mover • <b>W</b>: pular • <b>S</b>: defender • <b>J</b>: soco • <b>K</b>: chute • <b>L</b>: ESPECIAL (bola de fogo, precisa de energia cheia ⚡). Melhor de 3 rounds de 60s!</p>
+        </div>
+    </div>
+
+    <div class="end-overlay" id="endOverlay">
+        <div class="end-title" id="endTitle"></div>
+        <div class="end-sub" id="endSub"></div>
+        <button class="end-btn" onclick="backToSelect()">NOVA LUTA</button>
+    </div>
+
+    <script>
+    const AC = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let musicPlaying = false;
+    let musicTimer = null;
+
+    function ensureAudio() {
+        if (!audioCtx) audioCtx = new AC();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function tone(freq, dur, type = 'sine', vol = 0.15, when = 0) {
+        if (!audioCtx || !musicPlaying) return;
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = type;
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(vol, audioCtx.currentTime + when);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + when + dur);
+        o.connect(g);
+        g.connect(audioCtx.destination);
+        o.start(audioCtx.currentTime + when);
+        o.stop(audioCtx.currentTime + when + dur);
+    }
+
+    function playSound(kind) {
+        ensureAudio();
+        const saved = musicPlaying;
+        musicPlaying = true;
+        if (kind === 'punch') tone(150 + Math.random() * 40, 0.08, 'square', 0.14);
+        else if (kind === 'kick') tone(110 + Math.random() * 30, 0.12, 'square', 0.16);
+        else if (kind === 'special') { tone(300, 0.2, 'sawtooth', 0.12); tone(500, 0.3, 'sine', 0.1, 0.1); }
+        else if (kind === 'hit') tone(90, 0.14, 'sawtooth', 0.2);
+        else if (kind === 'block') tone(500, 0.06, 'triangle', 0.08);
+        else if (kind === 'ko') { tone(300, 0.4, 'sawtooth', 0.2); tone(150, 0.6, 'sawtooth', 0.2, 0.1); }
+        else if (kind === 'win') { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.2, 'sine', 0.13, i * 0.12)); }
+        else if (kind === 'lose') { [400, 320, 250, 180].forEach((f, i) => tone(f, 0.3, 'sawtooth', 0.12, i * 0.2)); }
+        else if (kind === 'round') { [440, 554, 659].forEach((f, i) => tone(f, 0.15, 'triangle', 0.1, i * 0.1)); }
+        else if (kind === 'click') tone(400, 0.05, 'square', 0.06);
+        musicPlaying = saved;
+    }
+
+    function startMusicLoop() {
+        stopMusicLoop();
+        const scale = [130.81, 155.56, 174.61, 196, 233.08];
+        let step = 0;
+        musicTimer = setInterval(() => {
+            if (!musicPlaying || !audioCtx) return;
+            const f = scale[Math.floor(Math.random() * scale.length)];
+            tone(f, 1.2, 'sawtooth', 0.03);
+            if (step % 2 === 0) tone(f * 1.5, 0.9, 'square', 0.02);
+            step++;
+        }, 750);
+    }
+
+    function stopMusicLoop() { if (musicTimer) { clearInterval(musicTimer); musicTimer = null; } }
+
+    function toggleMusic() {
+        ensureAudio();
+        musicPlaying = !musicPlaying;
+        const btn = document.getElementById('musicBtn');
+        btn.textContent = musicPlaying ? '🔊 MÚSICA' : '🔇 MUDO';
+        btn.style.filter = musicPlaying ? 'brightness(1.1)' : 'brightness(0.6)';
+        if (musicPlaying) startMusicLoop(); else stopMusicLoop();
+    }
+
+    const CHARS = {
+        rex:    { name: 'Rex',    emoji: '🥊', hp: 100, speed: 190, color: '#f97316', color2: '#7c2d12', punch: [7, 58],  kick: [11, 74],  projDmg: 15 },
+        kobra:  { name: 'Kobra',  emoji: '🐍', hp: 88,  speed: 245, color: '#22c55e', color2: '#14532d', punch: [5, 54],  kick: [9, 70],   projDmg: 12 },
+        bronco: { name: 'Bronco', emoji: '🗿', hp: 125, speed: 150, color: '#7c3aed', color2: '#3b0764', punch: [9, 56],  kick: [14, 72],  projDmg: 18 }
+    };
+
+    const CPU_CHARS = ['rex', 'kobra', 'bronco'];
+
+    const DIFFS = {
+        easy:   { react: 0.75, blockChance: 0.15, aggro: 0.45, speedMul: 0.8 },
+        medium: { react: 0.45, blockChance: 0.3,  aggro: 0.65, speedMul: 0.95 },
+        hard:   { react: 0.25, blockChance: 0.45, aggro: 0.85, speedMul: 1.1 }
+    };
+
+    const GROUND = 380;
+    const W = 800;
+    const H = 450;
+
+    const canvas = document.getElementById('board');
+    const ctx = canvas.getContext('2d');
+
+    let diff = 'easy';
+    let playerChar = 'rex';
+    let cpuChar = 'kobra';
+    let player = null;
+    let cpu = null;
+    let projectiles = [];
+    let particles = [];
+    let floatTexts = [];
+    let state = 'menu';
+    let stateTimer = 0;
+    let round = 1;
+    let playerRounds = 0;
+    let cpuRounds = 0;
+    let roundTime = 60;
+    let banner = { text: '', t: 0 };
+    let streak = parseInt(localStorage.getItem('lutador_streak') || '0');
+    let wins = parseInt(localStorage.getItem('lutador_wins') || '0');
+    let paused = false;
+    let lastTime = 0;
+    let keys = {};
+    let loopActive = false;
+    let cpuThink = 0;
+
+    function loadStats() {
+        document.getElementById('winsVal').textContent = wins;
+        document.getElementById('streakVal').textContent = streak > 0 ? streak + ' seg.' : '--';
+    }
+
+    function setDifficulty(d) {
+        diff = d;
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.diff-btn.' + d).classList.add('active');
+    }
+
+    function makeFighter(charKey, x, facing) {
+        const c = CHARS[charKey];
+        return {
+            charKey: charKey,
+            def: c,
+            x: x,
+            y: 0,
+            vy: 0,
+            hp: c.hp,
+            maxHp: c.hp,
+            energy: 0,
+            facing: facing,
+            state: 'idle',
+            stateT: 0,
+            hitDone: false,
+            invuln: 0,
+            flash: 0,
+            walkPhase: 0
+        };
+    }
+
+    function startGame(charKey) {
+        playSound('click');
+        ensureAudio();
+        playerChar = charKey;
+        cpuChar = CPU_CHARS[Math.floor(Math.random() * CPU_CHARS.length)];
+        while (cpuChar === charKey && Math.random() < 0.7) cpuChar = CPU_CHARS[(CPU_CHARS.indexOf(charKey) + 1 + Math.floor(Math.random() * 2)) % 3];
+        round = 1;
+        playerRounds = 0;
+        cpuRounds = 0;
+        startRound();
+        document.getElementById('charSelect').style.display = 'none';
+        document.getElementById('startBtn').textContent = 'TROCAR LUTADOR';
+        document.getElementById('pauseBtn').style.display = 'inline-block';
+        document.getElementById('endOverlay').classList.remove('show');
+        setPauseUI(false);
+        loopActive = true;
+        lastTime = performance.now();
+        requestAnimationFrame(loop);
+    }
+
+    function backToSelect() {
+        playSound('click');
+        state = 'menu';
+        paused = false;
+        document.getElementById('pauseBtn').style.display = 'none';
+        document.getElementById('endOverlay').classList.remove('show');
+        document.getElementById('charSelect').style.display = 'flex';
+        drawIdle();
+    }
+
+    function startRound() {
+        player = makeFighter(playerChar, 220, 1);
+        cpu = makeFighter(cpuChar, 580, -1);
+        projectiles = [];
+        particles = [];
+        floatTexts = [];
+        roundTime = 60;
+        state = 'intro';
+        stateTimer = 2;
+        banner = { text: 'ROUND ' + round, t: 2 };
+        playSound('round');
+    }
+
+    function togglePause() {
+        if (state === 'menu' || state === 'over') return;
+        paused = !paused;
+        setPauseUI(paused);
+    }
+
+    function setPauseUI(p) {
+        const btn = document.getElementById('pauseBtn');
+        document.getElementById('pauseOverlay').classList.toggle('show', p);
+        btn.classList.toggle('paused', p);
+        btn.textContent = p ? '▶ CONTINUAR (P)' : '⏸ PAUSA (P)';
+    }
+
+    function loop(now) {
+        if (!loopActive) return;
+        const dt = Math.min(0.05, (now - lastTime) / 1000);
+        lastTime = now;
+        if (!paused) update(dt);
+        draw();
+        requestAnimationFrame(loop);
+    }
+
+    function update(dt) {
+        stateTimer -= dt;
+        if (banner.t > 0) banner.t -= dt;
+
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.life -= dt;
+            if (p.life <= 0) particles.splice(i, 1);
+        }
+        for (let i = floatTexts.length - 1; i >= 0; i--) {
+            const f = floatTexts[i];
+            f.y -= 45 * dt;
+            f.t -= dt;
+            if (f.t <= 0) floatTexts.splice(i, 1);
+        }
+
+        if (state === 'intro') {
+            if (stateTimer <= 0) {
+                state = 'fight';
+                stateTimer = 0;
+            }
+            return;
+        }
+        if (state === 'roundEnd') {
+            updateFighterPhysics(player, dt);
+            updateFighterPhysics(cpu, dt);
+            if (stateTimer <= 0) {
+                if (playerRounds >= 2 || cpuRounds >= 2) endMatch();
+                else { round++; startRound(); }
+            }
+            return;
+        }
+        if (state !== 'fight') return;
+
+        roundTime -= dt;
+
+        updatePlayerInput(dt);
+        updateCPU(dt);
+        updateFighter(player, dt);
+        updateFighter(cpu, dt);
+        updateProjectiles(dt);
+        checkAttacks();
+
+        if (player.hp <= 0 || cpu.hp <= 0) {
+            const winner = player.hp <= 0 ? 'cpu' : 'player';
+            endRound(winner, 'KO!');
+        } else if (roundTime <= 0) {
+            const winner = player.hp >= cpu.hp ? 'player' : 'cpu';
+            endRound(winner, 'TEMPO!');
+        }
+    }
+
+    function updatePlayerInput(dt) {
+        const f = player;
+        const busy = f.state === 'punch' || f.state === 'kick' || f.state === 'special' || f.state === 'hit';
+        if (busy || f.y < 0) return;
+        if (keys['s'] || keys['arrowdown']) {
+            f.state = 'block';
+            return;
+        }
+        if (f.state === 'block') f.state = 'idle';
+        let mv = 0;
+        if (keys['a'] || keys['arrowleft']) mv -= 1;
+        if (keys['d'] || keys['arrowright']) mv += 1;
+        if (mv !== 0) {
+            f.x += mv * f.def.speed * dt;
+            f.walkPhase += dt * 10;
+        }
+        f.x = Math.max(50, Math.min(W - 50, f.x));
+        if (keys['w'] || keys['arrowup']) {
+            f.vy = 340;
+            f.y = -0.01;
+        }
+        if (keys['j']) tryAttack(f, 'punch');
+        else if (keys['k']) tryAttack(f, 'kick');
+        else if (keys['l']) trySpecial(f);
+    }
+
+    function tryAttack(f, kind) {
+        if (f.state !== 'idle' && f.state !== 'block') return;
+        f.state = kind;
+        f.stateT = kind === 'punch' ? 0.28 : 0.4;
+        f.hitDone = false;
+    }
+
+    function trySpecial(f) {
+        if (f.state !== 'idle' && f.state !== 'block') return;
+        if (f.energy < 100) {
+            addFloat(f.x, GROUND - 120 - f.y, 'Sem energia!', '#fca5a5');
+            return;
+        }
+        f.energy = 0;
+        f.state = 'special';
+        f.stateT = 0.45;
+        f.hitDone = false;
+        playSound('special');
+    }
+
+    function updateCPU(dt) {
+        const m = DIFFS[diff];
+        cpuThink -= dt;
+        const f = cpu;
+        const busy = f.state === 'punch' || f.state === 'kick' || f.state === 'special' || f.state === 'hit';
+        if (busy || f.y < 0) return;
+
+        const dist = Math.abs(player.x - f.x);
+        const dir = Math.sign(player.x - f.x);
+        if (dir !== 0) f.facing = dir;
+
+        if (cpuThink > 0) {
+            if (f.state === 'block' && (dist > 90 || !playerAttacking())) f.state = 'idle';
+            else if (f.state === 'idle' && cpuThink > m.react * 0.5 && dist < 90 && playerAttacking() && Math.random() < m.blockChance) f.state = 'block';
+            return;
+        }
+        cpuThink = m.react * (0.7 + Math.random() * 0.6);
+        f.state = 'idle';
+
+        if (f.energy >= 100 && dist > 130 && Math.random() < 0.5) {
+            trySpecial(f);
+            return;
+        }
+        if (playerAttacking() && dist < 100 && Math.random() < m.blockChance) {
+            f.state = 'block';
+            return;
+        }
+        if (dist > 110) {
+            f.x += dir * f.def.speed * m.speedMul * dt;
+            f.walkPhase += dt * 10;
+        } else if (Math.random() < m.aggro) {
+            tryAttack(f, Math.random() < 0.55 ? 'punch' : 'kick');
+        } else if (dist < 70) {
+            f.x -= dir * 60 * dt;
+        }
+        f.x = Math.max(50, Math.min(W - 50, f.x));
+    }
+
+    function playerAttacking() {
+        return player.state === 'punch' || player.state === 'kick' || player.state === 'special';
+    }
+
+    function updateFighter(f, dt) {
+        f.flash = Math.max(0, f.flash - dt * 4);
+        f.invuln = Math.max(0, f.invuln - dt);
+        if (f.y < 0 || f.vy !== 0) {
+            f.vy -= 900 * dt;
+            f.y += f.vy * dt;
+            if (f.y >= 0) { f.y = 0; f.vy = 0; }
+        }
+        if (f.state === 'punch' || f.state === 'kick' || f.state === 'special') {
+            f.stateT -= dt;
+            if (f.stateT <= 0) f.state = 'idle';
+        } else if (f.state === 'hit') {
+            f.stateT -= dt;
+            if (f.stateT <= 0) f.state = 'idle';
+        }
+        if (f.state !== 'block' && f !== player && f.state === 'idle') {
+            f.facing = Math.sign(player.x - f.x) || f.facing;
+        }
+        if (f === player && (f.state === 'idle' || f.state === 'walk')) {
+            f.facing = Math.sign(cpu.x - f.x) || f.facing;
+        }
+    }
+
+    function updateFighterPhysics(f, dt) {
+        f.flash = Math.max(0, f.flash - dt * 4);
+        if (f.y < 0) {
+            f.vy -= 900 * dt;
+            f.y += f.vy * dt;
+            if (f.y >= 0) { f.y = 0; f.vy = 0; }
+        }
+    }
+
+    function updateProjectiles(dt) {
+        for (let i = projectiles.length - 1; i >= 0; i--) {
+            const p = projectiles[i];
+            p.x += p.vx * dt;
+            p.life -= dt;
+            const target = p.owner === player ? cpu : player;
+            if (Math.abs(p.x - target.x) < 40 && Math.abs(p.y - (GROUND - 60 - target.y)) < 50) {
+                applyHit(target, p.owner.def.projDmg, p.owner, true);
+                spawnParticles(p.x, p.y, '#f97316', 12);
+                projectiles.splice(i, 1);
+                continue;
+            }
+            if (p.life <= 0 || p.x < -30 || p.x > W + 30) projectiles.splice(i, 1);
+        }
+    }
+
+    function checkAttacks() {
+        checkAttackHit(player, cpu);
+        checkAttackHit(cpu, player);
+    }
+
+    function checkAttackHit(attacker, defender) {
+        if (attacker.hitDone) return;
+        if (attacker.state !== 'punch' && attacker.state !== 'kick' && attacker.state !== 'special') return;
+        const total = attacker.state === 'punch' ? 0.28 : (attacker.state === 'kick' ? 0.4 : 0.45);
+        const progress = 1 - (attacker.stateT / total);
+        if (progress < 0.35) return;
+        attacker.hitDone = true;
+
+        if (attacker.state === 'special') {
+            projectiles.push({
+                x: attacker.x + attacker.facing * 45,
+                y: GROUND - 62 - attacker.y,
+                vx: attacker.facing * 300,
+                owner: attacker,
+                life: 2.5
+            });
+            return;
+        }
+
+        const range = attacker.state === 'punch' ? attacker.def.punch[1] : attacker.def.kick[1];
+        const dmg = attacker.state === 'punch' ? attacker.def.punch[0] : attacker.def.kick[0];
+        const dx = (defender.x - attacker.x) * attacker.facing;
+        const dy = Math.abs(defender.y - attacker.y);
+        if (dx > 0 && dx < range + 30 && dy < 45) {
+            applyHit(defender, dmg, attacker, false);
+        }
+    }
+
+    function applyHit(target, dmg, attacker, isProj) {
+        if (target.invuln > 0) return;
+        let final = dmg;
+        let blocked = false;
+        if (target.state === 'block') {
+            final = Math.round(dmg * 0.25);
+            blocked = true;
+            playSound('block');
+        } else {
+            playSound('hit');
+            target.state = 'hit';
+            target.stateT = 0.32;
+            target.x += attacker.facing * 14;
+        }
+        target.hp -= final;
+        target.flash = 1;
+        target.energy = Math.min(100, target.energy + 6);
+        attacker.energy = Math.min(100, attacker.energy + 10);
+        spawnParticles(target.x, GROUND - 70 - target.y, blocked ? '#67e8f9' : '#ef4444', blocked ? 4 : 8);
+        addFloat(target.x, GROUND - 110 - target.y, (blocked ? '🛡️ ' : '') + '-' + final, blocked ? '#67e8f9' : '#fca5a5');
+    }
+
+    function endRound(winner, reason) {
+        state = 'roundEnd';
+        stateTimer = 2.2;
+        playSound('ko');
+        spawnParticles(winner === 'player' ? cpu.x : player.x, GROUND - 70, '#fbbf24', 25);
+        banner = { text: (winner === 'player' ? 'VOCÊ VENCEU' : 'CPU VENCEU') + ' — ' + reason, t: 2.2 };
+        if (winner === 'player') {
+            playerRounds++;
+            addFloat(player.x, GROUND - 150, '⭐', '#fbbf24');
+        } else {
+            cpuRounds++;
+        }
+    }
+
+    function endMatch() {
+        state = 'over';
+        loopActive = false;
+        paused = false;
+        setPauseUI(false);
+        const won = playerRounds >= 2;
+        const overlay = document.getElementById('endOverlay');
+        const title = document.getElementById('endTitle');
+        const sub = document.getElementById('endSub');
+        if (won) {
+            playSound('win');
+            wins++;
+            streak++;
+            localStorage.setItem('lutador_wins', wins);
+            localStorage.setItem('lutador_streak', streak);
+            title.textContent = 'VITÓRIA!';
+            title.className = 'end-title win';
+            sub.innerHTML = 'Você venceu ' + CHARS[cpuChar].name + ' por ' + playerRounds + ' a ' + cpuRounds + '!<br>Vitórias: <b>' + wins + '</b> • Sequência: <b>' + streak + '</b> 🏆';
+        } else {
+            playSound('lose');
+            streak = 0;
+            localStorage.setItem('lutador_streak', 0);
+            title.textContent = 'DERROTA...';
+            title.className = 'end-title lose';
+            sub.innerHTML = CHARS[cpuChar].name + ' venceu por ' + cpuRounds + ' a ' + playerRounds + '.<br>Sequência zerada! Tente de novo!';
+        }
+        loadStats();
+        setTimeout(() => overlay.classList.add('show'), 600);
+    }
+
+    function spawnParticles(x, y, color, n) {
+        for (let i = 0; i < n; i++) {
+            const a = Math.random() * Math.PI * 2;
+            const s = 60 + Math.random() * 140;
+            particles.push({ x: x, y: y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 60, life: 0.3 + Math.random() * 0.4, color: color, size: 2 + Math.random() * 3 });
+        }
+    }
+
+    function addFloat(x, y, text, color) {
+        floatTexts.push({ x: x, y: y, text: text, color: color, t: 0.9 });
+    }
+
+    function drawArena() {
+        const bg = ctx.createLinearGradient(0, 0, 0, H);
+        bg.addColorStop(0, '#1a1024');
+        bg.addColorStop(1, '#2a1533');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.fillStyle = 'rgba(249,115,22,0.06)';
+        for (let i = 0; i < 5; i++) {
+            ctx.fillRect(60 + i * 160, 40, 90, 55);
+        }
+
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.fillRect(0, GROUND, W, H - GROUND);
+        ctx.strokeStyle = 'rgba(249,115,22,0.35)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, GROUND);
+        ctx.lineTo(W, GROUND);
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(249,115,22,0.08)';
+        for (let i = 0; i < 10; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * 80, GROUND);
+            ctx.lineTo(i * 80 - 40, H);
+            ctx.stroke();
+        }
+    }
+
+    function drawFighter(f) {
+        const d = f.def;
+        const fx = f.x;
+        const fy = GROUND - 70 - f.y;
+        const facing = f.facing;
+
+        ctx.save();
+        if (f.flash > 0) {
+            ctx.shadowColor = '#ef4444';
+            ctx.shadowBlur = 25 * f.flash;
+        }
+
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.beginPath();
+        ctx.ellipse(fx, GROUND - 4, 34, 9, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        const legSpread = f.state === 'idle' || f.state === 'block' ? 12 : 18;
+        const walk = f.state === 'idle' ? Math.sin(f.walkPhase) * 3 : 0;
+        ctx.strokeStyle = d.color2;
+        ctx.lineWidth = 9;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(fx - 4, fy + 22);
+        ctx.lineTo(fx - legSpread, GROUND - 6 + walk);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(fx + 4, fy + 22);
+        ctx.lineTo(fx + legSpread, GROUND - 6 - walk);
+        ctx.stroke();
+
+        const kicking = f.state === 'kick';
+        if (kicking) {
+            const prog = 1 - (f.stateT / 0.4);
+            const ext = Math.sin(Math.min(1, prog / 0.6) * Math.PI) * (d.kick[1] * 0.75);
+            ctx.strokeStyle = d.color;
+            ctx.lineWidth = 11;
+            ctx.beginPath();
+            ctx.moveTo(fx, fy + 30);
+            ctx.lineTo(fx + facing * (18 + ext), fy + 26);
+            ctx.stroke();
+        }
+
+        const torsoGrad = ctx.createLinearGradient(fx, fy - 20, fx, fy + 30);
+        torsoGrad.addColorStop(0, d.color);
+        torsoGrad.addColorStop(1, d.color2);
+        ctx.fillStyle = torsoGrad;
+        ctx.strokeStyle = '#0f0a18';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(fx - 16, fy - 12, 32, 38, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        const headR = 13;
+        const hx = fx + facing * 3;
+        const hy = fy - 28;
+        ctx.fillStyle = '#f5d0b0';
+        ctx.beginPath();
+        ctx.arc(hx, hy, headR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#0f0a18';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = d.color;
+        ctx.beginPath();
+        ctx.roundRect(hx - headR - 2, hy - 8, (headR + 2) * 2, 7, 3);
+        ctx.fill();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(hx + facing * 6, hy - 4, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#0f0a18';
+        ctx.beginPath();
+        ctx.arc(hx + facing * 6, hy + 2, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        const punching = f.state === 'punch';
+        const specials = f.state === 'special';
+        const blocking = f.state === 'block';
+        const armColor = d.color;
+        ctx.strokeStyle = armColor;
+        ctx.lineWidth = 8;
+        ctx.lineCap = 'round';
+
+        if (blocking) {
+            ctx.beginPath();
+            ctx.moveTo(fx, fy);
+            ctx.lineTo(fx + facing * 16, fy - 6);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(fx, fy + 8);
+            ctx.lineTo(fx + facing * 16, fy + 2);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(103,232,249,0.3)';
+            ctx.beginPath();
+            ctx.ellipse(fx + facing * 20, fy, 8, 26, 0, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (punching) {
+            const prog = 1 - (f.stateT / 0.28);
+            const ext = Math.sin(Math.min(1, prog / 0.5) * Math.PI) * (d.punch[1] * 0.7);
+            ctx.beginPath();
+            ctx.moveTo(fx, fy + 2);
+            ctx.lineTo(fx + facing * (16 + ext), fy);
+            ctx.stroke();
+            ctx.fillStyle = '#f5d0b0';
+            ctx.beginPath();
+            ctx.arc(fx + facing * (16 + ext), fy, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(fx, fy + 6);
+            ctx.lineTo(fx - facing * 12, fy + 12);
+            ctx.stroke();
+        } else if (specials) {
+            const prog = 1 - (f.stateT / 0.45);
+            const ext = Math.min(30, prog * 60);
+            ctx.beginPath();
+            ctx.moveTo(fx, fy);
+            ctx.lineTo(fx + facing * (14 + ext), fy - 4);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(fx, fy + 6);
+            ctx.lineTo(fx + facing * (14 + ext), fy + 2);
+            ctx.stroke();
+            if (prog > 0.3) {
+                ctx.fillStyle = '#f97316';
+                ctx.shadowColor = '#f97316';
+                ctx.shadowBlur = 18;
+                ctx.beginPath();
+                ctx.arc(fx + facing * (45 + ext), fy - 2, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        } else {
+            const sw = Math.sin(f.walkPhase) * 4;
+            ctx.beginPath();
+            ctx.moveTo(fx - 10, fy);
+            ctx.lineTo(fx - 16, fy + 16 + sw);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(fx + 10, fy);
+            ctx.lineTo(fx + 16, fy + 16 - sw);
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+
+    function draw() {
+        drawArena();
+
+        for (const p of projectiles) {
+            ctx.save();
+            ctx.fillStyle = '#f97316';
+            ctx.shadowColor = '#f97316';
+            ctx.shadowBlur = 20;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 11, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fde68a';
+            ctx.beginPath();
+            ctx.arc(p.x - Math.sign(p.vx) * 3, p.y, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        if (cpu) drawFighter(cpu);
+        if (player) drawFighter(player);
+
+        for (const p of particles) {
+            ctx.globalAlpha = Math.max(0, p.life * 2);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+        }
+        ctx.globalAlpha = 1;
+
+        for (const f of floatTexts) {
+            ctx.save();
+            ctx.globalAlpha = Math.min(1, f.t * 2);
+            ctx.font = 'bold 15px Roboto';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = f.color;
+            ctx.fillText(f.text, f.x, f.y);
+            ctx.restore();
+        }
+
+        if (player && cpu) {
+            drawHud();
+        }
+
+        if (banner.t > 0) {
+            ctx.save();
+            ctx.globalAlpha = Math.min(1, banner.t);
+            ctx.textAlign = 'center';
+            const fs = banner.text.length > 14 ? 22 : 34;
+            ctx.font = fs + 'px "Press Start 2P", monospace';
+            ctx.fillStyle = '#fbbf24';
+            ctx.shadowColor = '#f97316';
+            ctx.shadowBlur = 25;
+            ctx.fillText(banner.text, W / 2, H / 2 - 20);
+            ctx.restore();
+        }
+    }
+
+    function drawHud() {
+        const drawBar = (x, w, hp, maxHp, flip, color) => {
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(x, 20, w, 18);
+            const pct = Math.max(0, hp / maxHp);
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.fillRect(x + 3, 23, (w - 6) * pct, 12);
+            ctx.fillStyle = color;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 8;
+            if (flip) ctx.fillRect(x + 3 + (w - 6) * (1 - pct), 23, (w - 6) * pct, 12);
+            else ctx.fillRect(x + 3, 23, (w - 6) * pct, 12);
+            ctx.shadowBlur = 0;
+        };
+
+        drawBar(20, 300, player.hp, player.maxHp, false, '#22c55e');
+        drawBar(W - 320, 300, cpu.hp, cpu.maxHp, true, '#ef4444');
+
+        const drawEnergy = (x, w, energy, flip) => {
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(x, 44, w, 7);
+            ctx.fillStyle = energy >= 100 ? '#fbbf24' : '#06b6d4';
+            if (energy >= 100) { ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 10; }
+            if (flip) ctx.fillRect(x + w - w * (energy / 100), 44, w * (energy / 100), 7);
+            else ctx.fillRect(x, 44, w * (energy / 100), 7);
+            ctx.shadowBlur = 0;
+        };
+        drawEnergy(20, 300, player.energy, false);
+        drawEnergy(W - 320, 300, cpu.energy, true);
+
+        ctx.font = '10px "Press Start 2P", monospace';
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#86efac';
+        ctx.fillText(player.def.name.toUpperCase(), 20, 66);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#fca5a5';
+        ctx.fillText(cpu.def.name.toUpperCase() + ' (CPU)', W - 20, 66);
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px "Press Start 2P", monospace';
+        ctx.fillText(Math.max(0, Math.ceil(roundTime)) + 's', W / 2, 36);
+
+        for (let i = 0; i < 2; i++) {
+            ctx.fillStyle = i < playerRounds ? '#fbbf24' : 'rgba(255,255,255,0.2)';
+            ctx.beginPath();
+            ctx.arc(W / 2 - 30 - i * 22, 52, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = i < cpuRounds ? '#ef4444' : 'rgba(255,255,255,0.2)';
+            ctx.beginPath();
+            ctx.arc(W / 2 + 30 + i * 22, 52, 7, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function drawIdle() {
+        drawArena();
+        ctx.save();
+        ctx.globalAlpha = 0.5;
+        ctx.font = '44px serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🥊', W * 0.2, GROUND - 20);
+        ctx.fillText('🗿', W * 0.82, GROUND - 20);
+        ctx.restore();
+        ctx.save();
+        ctx.font = '28px "Press Start 2P", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#fdba74';
+        ctx.shadowColor = '#f97316';
+        ctx.shadowBlur = 22;
+        ctx.fillText('LUTADOR DE RUA', W / 2, H * 0.34);
+        ctx.restore();
+        ctx.save();
+        ctx.font = '11px "Press Start 2P", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#a0a0c0';
+        ctx.fillText('Escolha seu lutador acima!', W / 2, H * 0.44);
+        ctx.restore();
+    }
+
+    document.addEventListener('keydown', (e) => {
+        const k = e.key.toLowerCase();
+        keys[k] = true;
+        if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
+        if (k === 'p' && state !== 'menu' && state !== 'over') togglePause();
+    });
+    document.addEventListener('keyup', (e) => {
+        keys[e.key.toLowerCase()] = false;
+    });
+
+    loadStats();
+    drawIdle();
+    </script>
+</body>
+</html>

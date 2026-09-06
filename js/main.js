@@ -563,8 +563,9 @@ const gamesDatabase = [
         rating: 4.9,
         plays: 25000,
         badge: "top",
-        description: "Lute contra oponentes em batalhas épicas.",
+        description: "Jogo de luta arcade! Socos, chutes, especiais e melhor de 3 rounds.",
         color: "#f97316",
+        gameFile: "games/lutador-de-rua.html",
         thumbnail: generateFighterThumb
     },
     {
@@ -638,8 +639,9 @@ const gamesDatabase = [
         rating: 4.7,
         plays: 15600,
         badge: "top",
-        description: "Corridas de alta velocidade com carros turbo.",
+        description: "Corrida contra 3 pilotos! Desvie do trânsito, use nitro e vença.",
         color: "#7c3aed",
+        gameFile: "games/corrida-turbo.html",
         thumbnail: generateTurboThumb
     },
     {
