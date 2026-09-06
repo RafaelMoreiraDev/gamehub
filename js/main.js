@@ -550,8 +550,9 @@ const gamesDatabase = [
         rating: 4.7,
         plays: 22500,
         badge: "popular",
-        description: "Capture e treine monstros para batalhar.",
+        description: "RPG de turnos! Escolha seu monstro, domine os elementos e vença arenas infinitas.",
         color: "#8b5cf6",
+        gameFile: "games/batalha-monstros.html",
         thumbnail: generateMonsterThumb
     },
     {
@@ -611,8 +612,9 @@ const gamesDatabase = [
         rating: 4.8,
         plays: 19800,
         badge: "popular",
-        description: "Colete espadas mágicas e derrote o mal.",
+        description: "Arena de ação! Colete espadas flamejantes, gélidas, elétricas e sombrias.",
         color: "#14b8a6",
+        gameFile: "games/espadas-magicas.html",
         thumbnail: generateSwordsThumb
     },
     {
