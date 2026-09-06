@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Principal -->
+    <title>GameHub - Jogos Online Grátis para Jogar no Navegador | Sem Download</title>
+    <meta name="description" content="Jogue mais de 20 jogos online grátis direto no navegador! Jogos de ação, puzzle, esportes, corrida e RPG sem download e sem cadastro. Jogue no PC e no celular!">
+    <meta name="keywords" content="jogos online, jogos gratis, jogos no navegador, jogos sem download, jogos de ação, jogos de puzzle, jogos casuais, jogar online, jogos para pc, jogos para celular">
+    <meta name="author" content="GameHub">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://gamehub.example.com/">
+    
+    <!-- Open Graph (Facebook/WhatsApp) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="GameHub">
+    <meta property="og:title" content="GameHub - Jogos Online Grátis no Navegador">
+    <meta property="og:description" content="Mais de 20 jogos grátis para jogar direto no navegador. Sem download, sem cadastro. Ação, puzzle, esportes e mais!">
+    <meta property="og:url" content="https://gamehub.example.com/">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:image" content="https://gamehub.example.com/img/og-image.png">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="GameHub - Jogos Online Grátis no Navegador">
+    <meta name="twitter:description" content="Mais de 20 jogos grátis sem download. Jogue agora no PC ou celular!">
+    
+    <!-- Mobile / PWA -->
+    <meta name="theme-color" content="#ff6b6b">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GameHub">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+    
+    <!-- Schema.org - Dados Estruturados (Google Rich Results) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "GameHub",
+        "url": "https://gamehub.example.com/",
+        "description": "Plataforma de jogos online grátis para jogar no navegador sem download",
+        "inLanguage": "pt-BR",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://gamehub.example.com/?busca={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Jogos Online Grátis GameHub",
+        "itemListElement": [
+            {"@type": "VideoGame", "position": 1, "name": "Space Invaders", "genre": "Ação", "gamePlatform": "Navegador", "applicationCategory": "Game", "operatingSystem": "Any", "description": "Defenda a Terra dos alienígenas com 6 níveis e chefes épicos"},
+            {"@type": "VideoGame", "position": 2, "name": "Pong", "genre": "Esportes", "gamePlatform": "Navegador", "applicationCategory": "Game", "operatingSystem": "Any", "description": "O clássico jogo de tênis de mesa contra CPU ou 2 jogadores"},
+            {"@type": "VideoGame", "position": 3, "name": "Quiz Game", "genre": "Puzzle", "gamePlatform": "Navegador", "applicationCategory": "Game", "operatingSystem": "Any", "description": "Teste seus conhecimentos com 60+ perguntas em 6 categorias"},
+            {"@type": "VideoGame", "position": 4, "name": "Memória", "genre": "Puzzle", "gamePlatform": "Navegador", "applicationCategory": "Game", "operatingSystem": "Any", "description": "Encontre todos os pares de cartas em 3 níveis de dificuldade"}
+        ]
+    }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=2.5">
+</head>
+<body>
+    <a href="#games" class="skip-link">Pular para os jogos</a>
+    <nav class="navbar" aria-label="Navegação principal">
+        <div class="nav-brand">
+            <span class="logo" aria-hidden="true">🎮</span>
+            <span class="brand-name">GameHub</span>
+        </div>
+        <div class="nav-links">
+            <a href="#home" class="active">Início</a>
+            <a href="#games">Jogos</a>
+            <a href="#categories">Categorias</a>
+            <a href="#popular">Popular</a>
+            <a href="#about">Sobre</a>
+        </div>
+        <div class="nav-search" role="search">
+            <label for="searchInput" class="sr-only">Buscar jogos</label>
+            <input type="text" id="searchInput" placeholder="Buscar jogos..." aria-label="Buscar jogos">
+            <button id="searchBtn" aria-label="Buscar">🔍</button>
+        </div>
+        <div class="nav-user">
+            <span class="user-icon" aria-hidden="true">👤</span>
+        </div>
+    </nav>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">Jogos Online Grátis no <span class="highlight">Navegador</span></h1>
+                <p class="hero-subtitle">Mais de 20 jogos grátis para jogar no PC e celular — sem download, sem cadastro!</p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number" id="totalGames">0</span>
+                        <span class="stat-label">Jogos</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="totalCategories">0</span>
+                        <span class="stat-label">Categorias</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="totalPlayers">0</span>
+                        <span class="stat-label">Jogadores</span>
+                    </div>
+                </div>
+                <button class="cta-button" onclick="scrollToGames()">Explorar Jogos</button>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-preview-card">
+                    <canvas id="heroCanvas" width="320" height="200"></canvas>
+                    <div class="hero-preview-info">
+                        <span class="hero-preview-badge">DESTAQUE</span>
+                        <h3>Invasores Espaciais</h3>
+                        <p>6 níveis • Chefes • Power-ups</p>
+                    </div>
+                    <button class="hero-preview-btn" onclick="openGame(22)">▶ JOGAR AGORA</button>
+                </div>
+                <div class="hero-float-chip chip1">🏓 Pong <span class="chip-check">✓</span></div>
+                <div class="hero-float-chip chip2">🧠 Quiz <span class="chip-check">✓</span></div>
+                <div class="hero-float-chip chip3">🃏 Memória <span class="chip-check">✓</span></div>
+            </div>
+        </section>
+
+        <section id="popular" class="popular-section">
+            <h2 class="section-title">🎮 Jogue Agora — Jogos Prontos</h2>
+            <p class="section-description">Estes jogos estão prontos para jogar — clique e divirta-se!</p>
+            <div class="carousel-container">
+                <button class="carousel-btn carousel-btn-left" onclick="scrollCarousel(-1)">◀</button>
+                <div class="popular-carousel" id="popularCarousel">
+                    <!-- Jogos prontos serão inseridos via JS -->
+                </div>
+                <button class="carousel-btn carousel-btn-right" onclick="scrollCarousel(1)">▶</button>
+            </div>
+        </section>
+
+        <section id="categories" class="categories-section">
+            <h2 class="section-title">Categorias</h2>
+            <div class="categories-grid" id="categoriesGrid">
+                <!-- Categorias serão inseridas via JS -->
+            </div>
+        </section>
+
+        <section id="games" class="games-section">
+            <h2 class="section-title">Todos os Jogos Online Grátis</h2>
+            <p class="section-description">Escolha um jogo e jogue agora — funciona no PC e no celular, sem download!</p>
+            <div class="games-filter" role="tablist" aria-label="Filtrar jogos por categoria">
+                <button class="filter-btn active" data-category="all">Todos</button>
+                <button class="filter-btn" data-category="acao">Ação</button>
+                <button class="filter-btn" data-category="aventura">Aventura</button>
+                <button class="filter-btn" data-category="puzzle">Puzzle</button>
+                <button class="filter-btn" data-category="corrida">Corrida</button>
+                <button class="filter-btn" data-category="esportes">Esportes</button>
+                <button class="filter-btn" data-category="rpg">RPG</button>
+            </div>
+            <div class="games-grid" id="gamesGrid">
+                <!-- Jogos serão inseridos via JS -->
+            </div>
+        </section>
+
+        <section class="featured-section">
+            <h2 class="section-title">Jogo em Destaque</h2>
+            <div class="featured-game" id="featuredGame">
+                <!-- Jogo destaque será inserido via JS -->
+            </div>
+        </section>
+
+        <section id="about" class="about-section">
+            <h2 class="section-title">Sobre o GameHub</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>O GameHub é uma plataforma de <strong>jogos online grátis</strong> para jogar direto no navegador, no PC ou no celular. Nossa coleção inclui jogos de ação, aventura, puzzle, corrida, esportes e RPG — tudo <strong>sem download</strong> e <strong>sem cadastro</strong>.</p>
+                    <p>Clique em um jogo e comece a jogar em segundos. Perfeito para pausas rápidas no trabalho, entretenimento em casa ou para jogar com amigos em jogos de 2 jogadores como o clássico Pong.</p>
+                    <div class="about-features">
+                        <div class="feature">
+                            <span class="feature-icon">🎮</span>
+                            <span class="feature-text">Jogos Variados</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">🆓</span>
+                            <span class="feature-text">Totalmente Grátis</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">⚡</span>
+                            <span class="feature-text">Sem Downloads</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">🔒</span>
+                            <span class="feature-text">Seguro e Confiável</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="game-modal" id="gameModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">×</button>
+            <div class="game-container" id="gameContainer">
+                <!-- Jogo será carregado aqui -->
+            </div>
+            <div class="game-info" id="gameInfo">
+                <!-- Informações do jogo -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="logo">🎮</span>
+                <span class="brand-name">GameHub</span>
+                <p>Sua plataforma de jogos favorita</p>
+            </div>
+            <div class="footer-links">
+                <h4>Links Úteis</h4>
+                <a href="#home">Início</a>
+                <a href="#games">Jogos</a>
+                <a href="#categories">Categorias</a>
+                <a href="#about">Sobre</a>
+            </div>
+            <div class="footer-social">
+                <h4>Redes Sociais</h4>
+                <div class="social-icons">
+                    <a href="#" class="social-icon">📘</a>
+                    <a href="#" class="social-icon">🐦</a>
+                    <a href="#" class="social-icon">📷</a>
+                    <a href="#" class="social-icon">📺</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 GameHub. Todos os direitos reservados.</p>
+            <p class="footer-legal">
+                <a href="politica-de-privacidade.html">Política de Privacidade</a> •
+                <a href="termos-de-uso.html">Termos de Uso</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="js/main.js?v=2.5"></script>
+</body>
+</html>

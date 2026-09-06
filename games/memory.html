@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memória - GameHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Roboto', sans-serif;
+            color: white;
+            padding: 20px;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2rem;
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 5px #f093fb); }
+            to { filter: drop-shadow(0 0 20px #f5576c); }
+        }
+
+        .game-subtitle {
+            color: #a0a0a0;
+            font-size: 0.8rem;
+        }
+
+        .game-container {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 50px rgba(240, 147, 251, 0.3);
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.55rem;
+            color: #a0a0a0;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            color: #f093fb;
+        }
+
+        .stat-value.moves {
+            color: #4ecdc4;
+        }
+
+        .stat-value.time {
+            color: #ffe66d;
+        }
+
+        .game-board {
+            display: grid;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+            perspective: 1000px;
+        }
+
+        .game-board.easy {
+            grid-template-columns: repeat(4, 70px);
+        }
+
+        .game-board.medium {
+            grid-template-columns: repeat(4, 70px);
+        }
+
+        .game-board.hard {
+            grid-template-columns: repeat(6, 60px);
+        }
+
+        .card {
+            width: 100%;
+            aspect-ratio: 1;
+            position: relative;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card.matched {
+            animation: matchPulse 0.5s ease;
+        }
+
+        @keyframes matchPulse {
+            0%, 100% { transform: rotateY(180deg) scale(1); }
+            50% { transform: rotateY(180deg) scale(1.1); }
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-back::before {
+            content: '?';
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
+            border: 3px solid rgba(240, 147, 251, 0.5);
+            transform: rotateY(180deg);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .control-btn {
+            padding: 10px 18px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #ff6b6b 0%, #cc5353 100%);
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .diff-btn {
+            padding: 8px 15px;
+            font-size: 0.6rem;
+            font-family: 'Press Start 2P', cursive;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: #a0a0a0;
+        }
+
+        .diff-btn.easy {
+            color: #4ecdc4;
+        }
+
+        .diff-btn.medium {
+            color: #ffe66d;
+        }
+
+        .diff-btn.hard {
+            color: #f5576c;
+        }
+
+        .diff-btn.active {
+            border-color: currentColor;
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+        }
+
+        .diff-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .win-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .win-overlay.visible {
+            display: flex;
+        }
+
+        .win-text {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2rem;
+            color: #f093fb;
+            text-shadow: 0 0 30px #f093fb;
+            margin-bottom: 20px;
+            animation: winPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes winPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .win-stats {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .win-stat {
+            text-align: center;
+        }
+
+        .win-stat-value {
+            display: block;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5rem;
+            color: #ffe66d;
+            margin-bottom: 5px;
+        }
+
+        .win-stat-label {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+        .stars {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .star {
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        .star.active {
+            color: #ffe66d;
+            text-shadow: 0 0 20px #ffe66d;
+            animation: starPop 0.5s ease;
+        }
+
+        @keyframes starPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .instructions {
+            margin-top: 15px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .instructions h3 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: #f093fb;
+            margin-bottom: 8px;
+        }
+
+        .instructions p {
+            color: #a0a0a0;
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 500px) {
+            .game-title {
+                font-size: 1.3rem;
+            }
+            
+            .game-board.easy,
+            .game-board.medium {
+                grid-template-columns: repeat(4, 60px);
+            }
+            
+            .game-board.hard {
+                grid-template-columns: repeat(6, 45px);
+            }
+            
+            .stat-value {
+                font-size: 0.9rem;
+            }
+            
+            .stat-label {
+                font-size: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">MEMÓRIA</h1>
+        <p class="game-subtitle">Encontre todos os pares!</p>
+    </div>
+
+    <div class="game-container">
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-label">MOVIMENTOS</div>
+                <div class="stat-value moves" id="movesCount">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">PARES</div>
+                <div class="stat-value" id="pairsCount">0/0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">TEMPO</div>
+                <div class="stat-value time" id="timer">00:00</div>
+            </div>
+        </div>
+
+        <div class="difficulty-selector">
+            <button class="diff-btn easy active" onclick="setDifficulty('easy')">FÁCIL (4x3)</button>
+            <button class="diff-btn medium" onclick="setDifficulty('medium')">MÉDIO (4x4)</button>
+            <button class="diff-btn hard" onclick="setDifficulty('hard')">DIFÍCIL (6x4)</button>
+        </div>
+
+        <div class="game-board easy" id="gameBoard">
+            <!-- Cartas serão geradas via JS -->
+        </div>
+
+        <div class="controls">
+            <button class="control-btn btn-start" id="startBtn" onclick="startGame()">INICIAR</button>
+            <button class="control-btn btn-reset" onclick="resetGame()">RESETAR</button>
+        </div>
+
+        <div class="instructions">
+            <h3>COMO JOGAR</h3>
+            <p>Clique nas cartas para virá-las. Encontre todos os pares para vencer!</p>
+        </div>
+    </div>
+
+    <div class="win-overlay" id="winOverlay">
+        <div class="win-text">PARABÉNS!</div>
+        <div class="stars" id="stars">
+            <span class="star">★</span>
+            <span class="star">★</span>
+            <span class="star">★</span>
+        </div>
+        <div class="win-stats">
+            <div class="win-stat">
+                <span class="win-stat-value" id="finalMoves">0</span>
+                <span class="win-stat-label">Movimentos</span>
+            </div>
+            <div class="win-stat">
+                <span class="win-stat-value" id="finalTime">00:00</span>
+                <span class="win-stat-label">Tempo</span>
+            </div>
+        </div>
+        <button class="control-btn btn-start" onclick="playAgain()">JOGAR NOVAMENTE</button>
+    </div>
+
+    <script>
+        // Emojis para as cartas
+        const emojis = ['🎮', '🎯', '🎲', '🎪', '🎨', '🎭', '🎸', '🎺', '🎻', '🎹', '🏆', '⚽', '🏀', '🎾', '🎱', '🎳'];
+
+        // Estado do jogo
+        let gameState = {
+            difficulty: 'easy',
+            cards: [],
+            flippedCards: [],
+            matchedPairs: 0,
+            totalPairs: 0,
+            moves: 0,
+            timer: 0,
+            timerInterval: null,
+            isPlaying: false,
+            isLocked: false
+        };
+
+        // Configurações de dificuldade
+        const difficulties = {
+            easy: { pairs: 6, cols: 4 },
+            medium: { pairs: 8, cols: 4 },
+            hard: { pairs: 12, cols: 6 }
+        };
+
+        // Elementos DOM
+        const gameBoard = document.getElementById('gameBoard');
+        const movesCountEl = document.getElementById('movesCount');
+        const pairsCountEl = document.getElementById('pairsCount');
+        const timerEl = document.getElementById('timer');
+        const startBtn = document.getElementById('startBtn');
+        const winOverlay = document.getElementById('winOverlay');
+        const starsEl = document.getElementById('stars');
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            initGame();
+        });
+
+        // Inicializar jogo
+        function initGame() {
+            const config = difficulties[gameState.difficulty];
+            gameState.totalPairs = config.pairs;
+            gameState.matchedPairs = 0;
+            gameState.moves = 0;
+            gameState.flippedCards = [];
+            gameState.isPlaying = false;
+            gameState.isLocked = false;
+            
+            // Limpar timer
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+            gameState.timer = 0;
+            
+            // Atualizar UI
+            updateUI();
+            
+            // Gerar cartas
+            generateCards();
+        }
+
+        // Gerar cartas
+        function generateCards() {
+            const config = difficulties[gameState.difficulty];
+            const numPairs = config.pairs;
+            
+            // Selecionar emojis aleatórios
+            const selectedEmojis = [];
+            const availableEmojis = [...emojis];
+            
+            for (let i = 0; i < numPairs; i++) {
+                const randomIndex = Math.floor(Math.random() * availableEmojis.length);
+                selectedEmojis.push(availableEmojis[randomIndex]);
+                availableEmojis.splice(randomIndex, 1);
+            }
+            
+            // Criar pares
+            const cardPairs = [...selectedEmojis, ...selectedEmojis];
+            
+            // Embaralhar
+            gameState.cards = shuffleArray(cardPairs);
+            
+            // Renderizar
+            renderBoard();
+        }
+
+        // Embaralhar array (Fisher-Yates)
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // Renderizar tabuleiro
+        function renderBoard() {
+            gameBoard.innerHTML = '';
+            gameBoard.className = 'game-board ' + gameState.difficulty;
+            
+            gameState.cards.forEach((emoji, index) => {
+                const card = createCard(emoji, index);
+                gameBoard.appendChild(card);
+            });
+        }
+
+        // Criar carta
+        function createCard(emoji, index) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.index = index;
+            card.dataset.emoji = emoji;
+            
+            card.innerHTML = `
+                <div class="card-face card-back"></div>
+                <div class="card-face card-front">${emoji}</div>
+            `;
+            
+            card.addEventListener('click', () => flipCard(card));
+            
+            return card;
+        }
+
+        // Virar carta
+        function flipCard(card) {
+            // Verificações
+            if (gameState.isLocked) return;
+            if (!gameState.isPlaying) return;
+            if (card.classList.contains('flipped')) return;
+            if (card.classList.contains('matched')) return;
+            if (gameState.flippedCards.length >= 2) return;
+            
+            // Virar carta
+            card.classList.add('flipped');
+            gameState.flippedCards.push(card);
+            
+            // Tocar som
+            playSound('flip');
+            
+            // Verificar se duas cartas foram viradas
+            if (gameState.flippedCards.length === 2) {
+                gameState.moves++;
+                updateUI();
+                checkMatch();
+            }
+        }
+
+        // Verificar correspondência
+        function checkMatch() {
+            gameState.isLocked = true;
+            
+            const [card1, card2] = gameState.flippedCards;
+            const match = card1.dataset.emoji === card2.dataset.emoji;
+            
+            if (match) {
+                // Correspondência!
+                setTimeout(() => {
+                    card1.classList.add('matched');
+                    card2.classList.add('matched');
+                    gameState.matchedPairs++;
+                    gameState.flippedCards = [];
+                    gameState.isLocked = false;
+                    
+                    playSound('match');
+                    updateUI();
+                    
+                    // Verificar vitória
+                    if (gameState.matchedPairs === gameState.totalPairs) {
+                        setTimeout(winGame, 500);
+                    }
+                }, 500);
+            } else {
+                // Não corresponde
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    gameState.flippedCards = [];
+                    gameState.isLocked = false;
+                    
+                    playSound('wrong');
+                }, 1000);
+            }
+        }
+
+        // Atualizar interface
+        function updateUI() {
+            movesCountEl.textContent = gameState.moves;
+            pairsCountEl.textContent = `${gameState.matchedPairs}/${gameState.totalPairs}`;
+            timerEl.textContent = formatTime(gameState.timer);
+        }
+
+        // Formatar tempo
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const secs = (seconds % 60).toString().padStart(2, '0');
+            return `${mins}:${secs}`;
+        }
+
+        // Iniciar jogo
+        function startGame() {
+            if (gameState.isPlaying) return;
+            
+            gameState.isPlaying = true;
+            startBtn.textContent = 'JOGANDO';
+            startBtn.disabled = true;
+            
+            // Iniciar timer
+            gameState.timerInterval = setInterval(() => {
+                gameState.timer++;
+                timerEl.textContent = formatTime(gameState.timer);
+            }, 1000);
+            
+            // Mostrar cartas brevemente
+            showCardsBriefly();
+        }
+
+        // Mostrar cartas brevemente
+        function showCardsBriefly() {
+            gameState.isLocked = true;
+            
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => card.classList.add('flipped'));
+            
+            setTimeout(() => {
+                cards.forEach(card => card.classList.remove('flipped'));
+                gameState.isLocked = false;
+            }, 1500);
+        }
+
+        // Resetar jogo
+        function resetGame() {
+            initGame();
+            startBtn.textContent = 'INICIAR';
+            startBtn.disabled = false;
+            winOverlay.classList.remove('visible');
+        }
+
+        // Configurar dificuldade
+        function setDifficulty(diff) {
+            if (gameState.isPlaying) {
+                if (!confirm('Isso resetará o jogo. Continuar?')) return;
+            }
+            
+            gameState.difficulty = diff;
+            
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.diff-btn.${diff}`).classList.add('active');
+            
+            resetGame();
+        }
+
+        // Vitória
+        function winGame() {
+            clearInterval(gameState.timerInterval);
+            gameState.isPlaying = false;
+            
+            // Calcular estrelas
+            const config = difficulties[gameState.difficulty];
+            const idealMoves = config.pairs;
+            const moveRatio = gameState.moves / idealMoves;
+            
+            let stars = 1;
+            if (moveRatio <= 1.5) stars = 3;
+            else if (moveRatio <= 2) stars = 2;
+            
+            // Atualizar overlay
+            document.getElementById('finalMoves').textContent = gameState.moves;
+            document.getElementById('finalTime').textContent = formatTime(gameState.timer);
+            
+            // Mostrar estrelas
+            const starElements = starsEl.querySelectorAll('.star');
+            starElements.forEach((star, index) => {
+                star.classList.remove('active');
+                if (index < stars) {
+                    setTimeout(() => star.classList.add('active'), 300 * (index + 1));
+                }
+            });
+            
+            // Mostrar overlay
+            winOverlay.classList.add('visible');
+            
+            playSound('win');
+        }
+
+        // Jogar novamente
+        function playAgain() {
+            resetGame();
+        }
+
+        // Efeitos sonoros
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+        }
+
+        function playSound(type) {
+            initAudio();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            switch(type) {
+                case 'flip':
+                    oscillator.frequency.value = 600;
+                    oscillator.type = 'sine';
+                    gainNode.gain.value = 0.15;
+                    break;
+                case 'match':
+                    oscillator.frequency.value = 880;
+                    oscillator.type = 'sine';
+                    gainNode.gain.value = 0.2;
+                    break;
+                case 'wrong':
+                    oscillator.frequency.value = 200;
+                    oscillator.type = 'square';
+                    gainNode.gain.value = 0.15;
+                    break;
+                case 'win':
+                    oscillator.frequency.value = 1000;
+                    oscillator.type = 'sine';
+                    gainNode.gain.value = 0.3;
+                    break;
+            }
+            
+            oscillator.start();
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            oscillator.stop(audioCtx.currentTime + 0.15);
+        }
+
+        // Efeito de confete para vitória
+        function createConfetti() {
+            const colors = ['#f093fb', '#f5576c', '#4ecdc4', '#ffe66d'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: 10px;
+                    height: 10px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    left: ${Math.random() * 100}vw;
+                    top: -10px;
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                    pointer-events: none;
+                    z-index: 1000;
+                    animation: confettiFall ${2 + Math.random() * 2}s linear forwards;
+                `;
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 4000);
+            }
+        }
+
+        // Adicionar animação de confete
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes confettiFall {
+                to {
+                    top: 100vh;
+                    transform: rotate(${360 + Math.random() * 720}deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Modificar winGame para incluir confete
+        const originalWinGame = winGame;
+        winGame = function() {
+            originalWinGame();
+            createConfetti();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+    "name": "GameHub - Plataforma de Jogos",
+    "short_name": "GameHub",
+    "description": "Sua plataforma definitiva para jogos online gratuitos",
+    "start_url": "index.html",
+    "display": "standalone",
+    "background_color": "#1a1a2e",
+    "theme_color": "#ff6b6b",
+    "orientation": "any",
+    "icons": [
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ],
+    "categories": ["games", "entertainment"]
+}

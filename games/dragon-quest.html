@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missão do Dragão - GameHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #1a1033 0%, #0d0d1a 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Roboto', sans-serif;
+            color: white;
+            padding: 15px;
+        }
+        .game-header { text-align: center; margin-bottom: 10px; }
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5rem;
+            background: linear-gradient(90deg, #a855f7, #f0abfc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .game-container {
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 0 50px rgba(168,85,247,0.3);
+            max-width: 620px;
+            width: 100%;
+            position: relative;
+        }
+        /* Barras de status */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .status-item { display: flex; align-items: center; gap: 5px; }
+        .status-label { color: #a0a0a0; }
+        .status-value { color: #a855f7; }
+        .status-value.gold { color: #ffd700; }
+        .status-value.lvl { color: #ffe66d; }
+
+        /* Arena de batalha */
+        .battle-arena {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+        .combatant {
+            background: rgba(255,255,255,0.04);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .combatant.active-turn { border-color: #a855f7; box-shadow: 0 0 20px rgba(168,85,247,0.3); }
+        .combatant.hurt { animation: hurtShake 0.4s ease; }
+        @keyframes hurtShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); background: rgba(255,0,0,0.2); }
+            75% { transform: translateX(6px); background: rgba(255,0,0,0.2); }
+        }
+        .combatant.dead { opacity: 0.3; filter: grayscale(1); }
+        .c-sprite { font-size: 3.5rem; margin-bottom: 8px; display: block; }
+        .enemy-sprite { animation: enemyFloat 3s ease-in-out infinite; display: inline-block; }
+        @keyframes enemyFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .c-name { font-family: 'Press Start 2P', cursive; font-size: 0.65rem; margin-bottom: 8px; }
+        .hero-name { color: #7ec8e0; }
+        .enemy-name { color: #ff6b6b; }
+        .c-boss-name { color: #ff0088; text-shadow: 0 0 10px #ff0088; }
+
+        .hp-bar {
+            width: 100%; height: 14px;
+            background: #1a1a2e;
+            border-radius: 7px;
+            overflow: hidden;
+            margin-bottom: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .hp-fill {
+            height: 100%;
+            border-radius: 7px;
+            transition: width 0.4s ease;
+        }
+        .hp-fill.hero { background: linear-gradient(90deg, #4ecdc4, #22c55e); }
+        .hp-fill.enemy { background: linear-gradient(90deg, #ff6b6b, #cc5353); }
+        .hp-text { font-size: 0.65rem; color: #a0a0a0; }
+
+        /* Log de batalha */
+        .battle-log {
+            background: rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 10px 14px;
+            height: 100px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+            line-height: 1.7;
+            margin-bottom: 12px;
+            border: 1px solid rgba(168,85,247,0.2);
+        }
+        .battle-log p { margin-bottom: 2px; }
+        .log-hero { color: #4ecdc4; }
+        .log-enemy { color: #ff6b6b; }
+        .log-system { color: #ffe66d; }
+        .log-magic { color: #a855f7; }
+
+        /* Menu de ações */
+        .action-menu {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .action-btn {
+            padding: 12px 6px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            border: 2px solid rgba(168,85,247,0.4);
+            border-radius: 10px;
+            background: rgba(168,85,247,0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .action-btn .act-icon { font-size: 1.3rem; display: block; margin-bottom: 5px; }
+        .action-btn:hover:not(:disabled) {
+            background: rgba(168,85,247,0.3);
+            border-color: #a855f7;
+            transform: translateY(-2px);
+        }
+        .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .action-btn .act-cost { font-size: 0.45rem; color: #a0a0a0; display: block; margin-top: 4px; }
+        .action-btn.flee { border-color: rgba(255,107,107,0.4); background: rgba(255,107,107,0.08); }
+
+        /* Overlays */
+        .game-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.96);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 15px;
+            z-index: 10;
+            padding: 25px;
+            text-align: center;
+        }
+        .game-overlay.visible { display: flex; }
+        .overlay-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+        .overlay-title.victory { color: #22c55e; }
+        .overlay-title.gameover { color: #ff6b6b; }
+        .overlay-title.intro { color: #a855f7; }
+        .overlay-text {
+            color: #c0c0c0;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            max-width: 480px;
+        }
+        .overlay-btn {
+            padding: 12px 28px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.65rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            color: white;
+            margin: 4px;
+            transition: all 0.3s ease;
+        }
+        .overlay-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(168,85,247,0.4); }
+
+        /* Loja */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .shop-item {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,215,0,0.3);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .shop-item:hover { border-color: #ffd700; background: rgba(255,215,0,0.1); }
+        .shop-item .si-icon { font-size: 1.6rem; }
+        .shop-item .si-name { font-size: 0.8rem; margin: 4px 0; }
+        .shop-item .si-price { font-size: 0.75rem; color: #ffd700; }
+        .shop-item .si-desc { font-size: 0.65rem; color: #a0a0a0; }
+        .shop-item.sold-out { opacity: 0.4; pointer-events: none; }
+
+        /* Level up flash */
+        .levelup-banner {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            color: #ffe66d;
+            text-shadow: 0 0 30px #ffe66d;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .levelup-banner.show { animation: levelupFade 2.5s ease forwards; }
+        @keyframes levelupFade {
+            0% { opacity: 0; transform: translate(-50%,-50%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%,-50%) scale(1.15); }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Controles inferiores */
+        .bottom-controls {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        .ctrl-btn {
+            padding: 8px 14px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            color: #a0a0a0;
+            transition: all 0.2s ease;
+        }
+        .ctrl-btn:hover { color: white; background: rgba(255,255,255,0.2); }
+
+        @media (max-width: 520px) {
+            .game-title { font-size: 1rem; }
+            .battle-arena { grid-template-columns: 1fr; }
+            .action-menu { grid-template-columns: repeat(2, 1fr); }
+            .status-bar { font-size: 0.45rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title">MISSÃO DO DRAGÃO</h1>
+    </div>
+    <div class="game-container">
+        <div class="status-bar">
+            <div class="status-item"><span class="status-label">HERÓI:</span><span class="status-value lvl" id="heroLevel">Nv.1</span></div>
+            <div class="status-item"><span class="status-label">XP:</span><span class="status-value" id="heroXp">0/20</span></div>
+            <div class="status-item"><span class="status-label">OURO:</span><span class="status-value gold" id="heroGold">🪙 30</span></div>
+            <div class="status-item"><span class="status-label">POÇÕES:</span><span class="status-value" id="heroPotions">🧪 1</span></div>
+        </div>
+
+        <div class="battle-arena">
+            <div class="combatant" id="heroBox">
+                <span class="c-sprite" id="heroSprite">🧙</span>
+                <div class="c-name hero-name">AERO, O MAGO</div>
+                <div class="hp-bar"><div class="hp-fill hero" id="heroHpBar" style="width:100%"></div></div>
+                <div class="hp-text" id="heroHpText">100/100 HP</div>
+                <div class="hp-text" style="color:#4facfe" id="heroMpText">30/30 MP</div>
+            </div>
+            <div class="combatant" id="enemyBox">
+                <span class="c-sprite"><span class="enemy-sprite" id="enemySprite">👹</span></span>
+                <div class="c-name enemy-name" id="enemyName">GOBLIN</div>
+                <div class="hp-bar"><div class="hp-fill enemy" id="enemyHpBar" style="width:100%"></div></div>
+                <div class="hp-text" id="enemyHpText">20/20 HP</div>
+            </div>
+        </div>
+
+        <div class="battle-log" id="battleLog"></div>
+
+        <div class="action-menu" id="actionMenu">
+            <button class="action-btn" onclick="heroAttack()">
+                <span class="act-icon">⚔️</span>ATACAR
+            </button>
+            <button class="action-btn" onclick="heroFireball()">
+                <span class="act-icon">🔥</span>BOLA DE FOGO
+                <span class="act-cost">12 MP</span>
+            </button>
+            <button class="action-btn" onclick="heroHeal()">
+                <span class="act-icon">💚</span>CURAR
+                <span class="act-cost">12 MP</span>
+            </button>
+            <button class="action-btn" onclick="heroPotion()">
+                <span class="act-icon">🧪</span>POÇÃO
+                <span class="act-cost" id="potionCount">x1</span>
+            </button>
+            <button class="action-btn flee" onclick="heroFlee()">
+                <span class="act-icon">🏃</span>FUGIR
+            </button>
+        </div>
+
+        <div class="levelup-banner" id="levelupBanner">⬆ NÍVEL ACIMA! ⬆</div>
+
+        <!-- Intro -->
+        <div class="game-overlay visible" id="introOverlay">
+            <div class="overlay-title intro">⚔️ MISSÃO DO DRAGÃO ⚔️</div>
+            <p class="overlay-text">
+                O temível dragão <strong>IGNAROS</strong> sequestrou a princesa e ameaça o reino de Eldoria.<br><br>
+                Você é <strong>Aero, o Mago</strong>. Enfrente 9 inimigos, evolua seu poder, compre equipamentos e derrote o dragão para salvar o reino!
+            </p>
+            <button class="overlay-btn" onclick="startGame()">INICIAR JORNADA</button>
+        </div>
+
+        <!-- Loja -->
+        <div class="game-overlay" id="shopOverlay">
+            <div class="overlay-title victory">🛒 LOJA DO MERCADOR</div>
+            <p class="overlay-text">Gaste seu ouro antes da próxima batalha! Ouro atual: <span style="color:#ffd700" id="shopGold">0</span></p>
+            <div class="shop-grid" id="shopGrid"></div>
+            <button class="overlay-btn" onclick="closeShop()">CONTINUAR →</button>
+        </div>
+
+        <!-- Vitória de batalha -->
+        <div class="game-overlay" id="battleWinOverlay">
+            <div class="overlay-title victory">VITÓRIA!</div>
+            <p class="overlay-text" id="battleWinText"></p>
+            <button class="overlay-btn" onclick="afterBattleWin()">CONTINUAR</button>
+        </div>
+
+        <!-- Game Over -->
+        <div class="game-overlay" id="gameOverOverlay">
+            <div class="overlay-title gameover">VOCÊ FOI DERROTADO...</div>
+            <p class="overlay-text">O reino aguarda um novo herói. Sua jornada terminou no inimigo <span style="color:#ff6b6b" id="lastEnemy"></span>.</p>
+            <button class="overlay-btn" onclick="location.reload()">RECOMEÇAR JORNADA</button>
+        </div>
+
+        <!-- Vitória final -->
+        <div class="game-overlay" id="finalWinOverlay">
+            <div class="overlay-title victory">🏰 O REINO ESTÁ SALVO! 🏰</div>
+            <p class="overlay-text">
+                Você derrotou <strong>IGNAROS</strong> e resgatou a princesa!<br><br>
+                Nível final: <span style="color:#ffe66d" id="finalLevel"></span> • Ouro: <span style="color:#ffd700" id="finalGold"></span>
+            </p>
+            <button class="overlay-btn" onclick="location.reload()">JOGAR NOVAMENTE</button>
+        </div>
+
+        <div class="bottom-controls">
+            <button class="ctrl-btn" id="musicBtn" onclick="toggleMusic()">🔊 MÚSICA</button>
+            <button class="ctrl-btn" onclick="location.reload()">🔄 REINICIAR</button>
+        </div>
+    </div>
+
+    <script>
+    // ==================== ESTADO ====================
+    let hero, enemy, enemyIndex, busy = false, shopAdvance = false;
+    let audioCtx, musicOn = true, musicIntervals = [], musicMaster = null, seqStep = 0;
+
+    const enemiesDB = [
+        { name: 'GOBLIN', sprite: '👹', hp: 26, atk: 10, xp: 18, gold: 12, color: '#22c55e' },
+        { name: 'LOBO SELVAGEM', sprite: '🐺', hp: 40, atk: 13, xp: 26, gold: 16, color: '#6b7280' },
+        { name: 'ESQUELETO', sprite: '💀', hp: 58, atk: 16, xp: 38, gold: 24, color: '#e5e7eb' },
+        { name: 'BRUXA SOMBRIO', sprite: '🧟‍♀️', hp: 78, atk: 20, xp: 52, gold: 32, color: '#a855f7' },
+        { name: 'ORC GUERREIRO', sprite: '👹', hp: 100, atk: 24, xp: 70, gold: 45, color: '#f97316' },
+        { name: 'GOLEM DE PEDRA', sprite: '🗿', hp: 130, atk: 28, xp: 95, gold: 60, color: '#78716c' },
+        { name: 'CAVALEIRO SOMBRA', sprite: '🛡️', hp: 165, atk: 33, xp: 125, gold: 80, color: '#64748b' },
+        { name: 'REI LICH', sprite: '🧙‍♂️', hp: 210, atk: 39, xp: 165, gold: 110, color: '#8b5cf6' },
+        { name: 'IGNAROS, O DRAGÃO', sprite: '🐉', hp: 300, atk: 46, xp: 500, gold: 500, color: '#ff0088', boss: true }
+    ];
+
+    const shopItems = [
+        { id: 'potion', icon: '🧪', name: 'Poção de Vida', price: 35, desc: '+30 HP (usar na batalha)', repeat: true },
+        { id: 'ether', icon: '🔮', name: 'Éter Mágico', price: 40, desc: '+12 MP', repeat: true },
+        { id: 'inn', icon: '🏨', name: 'Estalagem', price: 45, desc: 'Restaura HP e MP totalmente', repeat: true },
+        { id: 'sword', icon: '🗡️', name: 'Cajado Melhorado', price: 80, desc: '+4 ATQ permanente', repeat: true },
+        { id: 'armor', icon: '🛡️', name: 'Manto Arcano', price: 65, desc: 'Reduz dano recebido em 2', repeat: true },
+        { id: 'maxhp', icon: '❤️', name: 'Coração de Dragão', price: 100, desc: '+20 HP máximo', repeat: true }
+    ];
+
+    const el = id => document.getElementById(id);
+    const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    // ==================== ÁUDIO ====================
+    const AC = window.AudioContext || window.webkitAudioContext;
+    function initAudio() { if (!audioCtx) audioCtx = new AC(); }
+
+    function playSound(type) {
+        initAudio();
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+        switch (type) {
+            case 'attack':
+                o.type = 'square'; o.frequency.setValueAtTime(300, now);
+                o.frequency.exponentialRampToValueAtTime(100, now + 0.12);
+                g.gain.value = 0.12;
+                g.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                o.start(); o.stop(now + 0.15); break;
+            case 'fire':
+                o.type = 'sawtooth'; o.frequency.setValueAtTime(200, now);
+                o.frequency.exponentialRampToValueAtTime(60, now + 0.35);
+                g.gain.value = 0.15;
+                g.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                o.start(); o.stop(now + 0.4); break;
+            case 'heal':
+                o.type = 'sine'; o.frequency.setValueAtTime(500, now);
+                o.frequency.linearRampToValueAtTime(900, now + 0.3);
+                g.gain.value = 0.12;
+                g.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                o.start(); o.stop(now + 0.4); break;
+            case 'hurt':
+                o.type = 'sawtooth'; o.frequency.setValueAtTime(180, now);
+                o.frequency.exponentialRampToValueAtTime(70, now + 0.2);
+                g.gain.value = 0.15;
+                g.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                o.start(); o.stop(now + 0.25); break;
+            case 'enemydies':
+                o.type = 'sawtooth'; o.frequency.setValueAtTime(400, now);
+                o.frequency.exponentialRampToValueAtTime(50, now + 0.5);
+                g.gain.value = 0.15;
+                g.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
+                o.start(); o.stop(now + 0.55); break;
+            case 'levelup':
+                [523, 659, 784, 1046].forEach((f, i) => {
+                    const oo = audioCtx.createOscillator(), gg = audioCtx.createGain();
+                    oo.connect(gg); gg.connect(audioCtx.destination);
+                    oo.type = 'sine'; oo.frequency.value = f;
+                    gg.gain.setValueAtTime(0.12, now + i * 0.1);
+                    gg.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.3);
+                    oo.start(now + i * 0.1); oo.stop(now + i * 0.1 + 0.32);
+                });
+                return;
+            case 'buy':
+                o.type = 'sine'; o.frequency.value = 900;
+                g.gain.value = 0.1;
+                g.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                o.start(); o.stop(now + 0.2); break;
+        }
+    }
+
+    // ============ TRILHA SONORA ÉPICA (Am F C G) ============
+    function startMusic() {
+        initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        stopMusic();
+        if (!musicOn) return;
+
+        musicMaster = audioCtx.createGain();
+        musicMaster.gain.value = 0.5;
+        musicMaster.connect(audioCtx.destination);
+
+        // Acordes: Am, F, C, G (raízes)
+        const chordRoots = [110, 87.31, 130.81, 98]; // A2, F2, C3, G2
+        const chordTones = [
+            [220, 261.63, 329.63],      // Am: A, C, E
+            [174.61, 220, 261.63],      // F: F, A, C
+            [261.63, 329.63, 392],      // C: C, E, G
+            [196, 246.94, 293.66]       // G: G, B, D
+        ];
+        // Melodia heroica (A menor pentatônica) - 32 steps
+        const melody = [
+            440, 0, 523.25, 0, 587.33, 0, 440, 0,
+            392, 0, 440, 0, 349.23, 0, 0, 0,
+            261.63, 0, 329.63, 0, 392, 0, 523.25, 0,
+            587.33, 0, 440, 0, 392, 0, 0, 0
+        ];
+        // BPM 100, colcheias = 300ms
+        const stepMs = 300;
+
+        musicIntervals.push(setInterval(() => {
+            if (!musicOn || !audioCtx) return;
+            const total = 32; // 2 compassos por acorde... na real 8 steps por acorde
+            const step = seqStep % 32;
+            const chordIdx = Math.floor(step / 8) % 4;
+            const now = audioCtx.currentTime;
+
+            // Baixo: raiz do acorde a cada 4 steps
+            if (step % 4 === 0) {
+                const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                o.connect(g); g.connect(musicMaster);
+                o.type = 'triangle';
+                o.frequency.value = chordRoots[chordIdx];
+                g.gain.setValueAtTime(0.11, now);
+                g.gain.exponentialRampToValueAtTime(0.01, now + 1.1);
+                o.start(); o.stop(now + 1.2);
+            }
+
+            // Arpejo do acorde (colcheias alternadas)
+            if (step % 2 === 1) {
+                const tone = chordTones[chordIdx][(Math.floor(step / 2)) % 3];
+                const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                o.connect(g); g.connect(musicMaster);
+                o.type = 'sine';
+                o.frequency.value = tone;
+                g.gain.setValueAtTime(0.05, now);
+                g.gain.exponentialRampToValueAtTime(0.005, now + 0.5);
+                o.start(); o.stop(now + 0.55);
+            }
+
+            // Melodia
+            const mNote = melody[step];
+            if (mNote > 0) {
+                const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                o.connect(g); g.connect(musicMaster);
+                o.type = 'square';
+                o.frequency.value = mNote;
+                g.gain.setValueAtTime(0.055, now);
+                g.gain.exponentialRampToValueAtTime(0.005, now + 0.45);
+                o.start(); o.stop(now + 0.5);
+            }
+
+            // Tambor de guerra no início de cada acorde (passo 0)
+            if (step % 8 === 0) {
+                const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                o.connect(g); g.connect(musicMaster);
+                o.type = 'sine';
+                o.frequency.setValueAtTime(100, now);
+                o.frequency.exponentialRampToValueAtTime(45, now + 0.15);
+                g.gain.setValueAtTime(0.14, now);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                o.start(); o.stop(now + 0.22);
+            }
+
+            seqStep++;
+        }, stepMs));
+    }
+
+    function stopMusic() {
+        musicIntervals.forEach(clearInterval);
+        musicIntervals = [];
+        if (musicMaster) {
+            try { musicMaster.disconnect(); } catch (e) {}
+            musicMaster = null;
+        }
+    }
+
+    function toggleMusic() {
+        musicOn = !musicOn;
+        el('musicBtn').textContent = musicOn ? '🔊 MÚSICA' : '🔇 MUDO';
+        if (musicOn) startMusic();
+        else stopMusic();
+    }
+
+    // ==================== LÓGICA ====================
+    function log(msg, cls = 'log-system') {
+        const p = document.createElement('p');
+        p.className = cls;
+        p.textContent = msg;
+        el('battleLog').appendChild(p);
+        el('battleLog').scrollTop = el('battleLog').scrollHeight;
+    }
+
+    function updateHeroUI() {
+        const hpPct = Math.max(0, hero.hp / hero.maxHp * 100);
+        el('heroHpBar').style.width = hpPct + '%';
+        el('heroHpText').textContent = `${hero.hp}/${hero.maxHp} HP`;
+        el('heroMpText').textContent = `${hero.mp}/${hero.maxMp} MP`;
+        el('heroLevel').textContent = 'Nv.' + hero.level;
+        el('heroXp').textContent = `${hero.xp}/${hero.xpNext}`;
+        el('heroGold').textContent = '🪙 ' + hero.gold;
+        el('heroPotions').textContent = '🧪 ' + hero.potions;
+        // Atualizar botões de magia e poção
+        el('actionMenu').children[1].disabled = hero.mp < 12;
+        el('actionMenu').children[2].disabled = hero.mp < 12;
+        el('actionMenu').children[3].disabled = hero.potions <= 0;
+        el('potionCount').textContent = 'x' + hero.potions;
+    }
+
+    function updateEnemyUI() {
+        const pct = Math.max(0, enemy.hp / enemy.maxHp * 100);
+        el('enemyHpBar').style.width = pct + '%';
+        el('enemyHpText').textContent = `${Math.max(0, enemy.hp)}/${enemy.maxHp} HP`;
+    }
+
+    function shakeBox(id) {
+        const box = el(id);
+        box.classList.remove('hurt');
+        void box.offsetWidth;
+        box.classList.add('hurt');
+    }
+
+    function spawnEnemy() {
+        const def = enemiesDB[enemyIndex];
+        enemy = { ...def, maxHp: def.hp };
+        el('enemySprite').textContent = def.sprite;
+        el('enemyName').textContent = def.name;
+        el('enemyName').className = 'c-name ' + (def.boss ? 'c-boss-name' : 'enemy-name');
+        updateEnemyUI();
+        log(`⚠️ ${def.name} apareceu!`, 'log-enemy');
+    }
+
+    function heroTurn(onDone) {
+        el('heroBox').classList.add('active-turn');
+        el('enemyBox').classList.remove('active-turn');
+        busy = false;
+    }
+
+    function enemyTurn() {
+        el('enemyBox').classList.add('active-turn');
+        el('heroBox').classList.remove('active-turn');
+        setTimeout(() => {
+            // IA do inimigo: 35% de chance de ataque devastador
+            const strong = Math.random() < 0.35;
+            let dmg = rnd(enemy.atk - 4, enemy.atk + 3);
+            if (strong) dmg = Math.floor(dmg * 1.8);
+            dmg = Math.max(1, dmg - hero.def);
+            hero.hp -= dmg;
+            playSound('hurt');
+            shakeBox('heroBox');
+            log(`${enemy.name} usou ${strong ? 'um ATAQUE DEVASTADOR' : 'um ataque'}! -${dmg} HP`, 'log-enemy');
+            updateHeroUI();
+            el('actionMenu').children[4].disabled = false;
+
+            if (hero.hp <= 0) {
+                gameOver();
+                return;
+            }
+            el('heroBox').classList.add('active-turn');
+            el('enemyBox').classList.remove('active-turn');
+            busy = false;
+        }, 800);
+    }
+
+    function heroAttack() {
+        if (busy || hero.hp <= 0) return;
+        busy = true;
+        const crit = Math.random() < 0.1;
+        let dmg = rnd(hero.atk - 3, hero.atk + 4);
+        if (crit) dmg = Math.floor(dmg * 1.8);
+        enemy.hp -= dmg;
+        playSound('attack');
+        shakeBox('enemyBox');
+        log(crit ? `⚔️ CRÍTICO! Você golpeou ${enemy.name}: -${dmg}!` : `⚔️ Você atacou ${enemy.name}: -${dmg}`, 'log-hero');
+        updateEnemyUI();
+        afterHeroAction();
+    }
+
+    function heroFireball() {
+        if (busy || hero.mp < 12) return;
+        busy = true;
+        hero.mp -= 12;
+        const dmg = rnd(hero.atk + 4, hero.atk + 10);
+        enemy.hp -= dmg;
+        playSound('fire');
+        shakeBox('enemyBox');
+        log(`🔥 BOLA DE FOGO! ${enemy.name} sofreu -${dmg}!`, 'log-magic');
+        updateHeroUI();
+        updateEnemyUI();
+        afterHeroAction();
+    }
+
+    function heroHeal() {
+        if (busy || hero.mp < 12) return;
+        if (hero.hp >= hero.maxHp) {
+            log('💚 Sua vida já está cheia!', 'log-system');
+            return;
+        }
+        busy = true;
+        hero.mp -= 12;
+        const heal = 22;
+        hero.hp = Math.min(hero.maxHp, hero.hp + heal);
+        playSound('heal');
+        log(`💚 Você recuperou ${heal} HP!`, 'log-magic');
+        updateHeroUI();
+        afterHeroAction();
+    }
+
+    function heroPotion() {
+        if (busy || hero.potions <= 0) return;
+        if (hero.hp >= hero.maxHp) {
+            log('🧪 Sua vida já está cheia!', 'log-system');
+            return;
+        }
+        busy = true;
+        hero.potions--;
+        hero.hp = Math.min(hero.maxHp, hero.hp + 30);
+        playSound('heal');
+        log('🧪 Você bebeu uma poção: +30 HP!', 'log-magic');
+        updateHeroUI();
+        afterHeroAction();
+    }
+
+    function heroFlee() {
+        if (busy) return;
+        if (enemy.boss) {
+            log('🏃 Você não pode fugir do DRAGÃO! Encare seu destino!', 'log-enemy');
+            return;
+        }
+        if (Math.random() < 0.35) {
+            log('🏃 Você fugiu da batalha!', 'log-system');
+            log('Fugindo não avança a jornada... o mercador tem ofertas!', 'log-system');
+            openShop(false);
+        } else {
+            busy = true;
+            log('🏃 A fuga falhou!', 'log-system');
+            enemyTurn();
+        }
+    }
+
+    function afterHeroAction() {
+        setTimeout(() => {
+            if (enemy.hp <= 0) {
+                enemyDefeated();
+            } else {
+                enemyTurn();
+            }
+        }, 500);
+    }
+
+    function enemyDefeated() {
+        el('enemyBox').classList.add('dead');
+        playSound('enemydies');
+        hero.xp += enemy.xp;
+        hero.gold += enemy.gold;
+        log(`🏆 ${enemy.name} foi derrotado! +${enemy.xp} XP, +${enemy.gold} ouro`, 'log-system');
+
+        // Level up
+        while (hero.xp >= hero.xpNext) {
+            hero.xp -= hero.xpNext;
+            hero.level++;
+            hero.xpNext = Math.floor(hero.xpNext * 1.8);
+            hero.maxHp += 12;
+            hero.maxMp += 4;
+            hero.atk += 2;
+            hero.hp = hero.maxHp;
+            hero.mp = hero.maxMp;
+            playSound('levelup');
+            const banner = el('levelupBanner');
+            banner.textContent = `⬆ NÍVEL ${hero.level}! +12 HP +4 MP +2 ATQ`;
+            banner.classList.remove('show');
+            void banner.offsetWidth;
+            banner.classList.add('show');
+        }
+
+        setTimeout(() => {
+            el('battleWinText').innerHTML = enemy.boss
+                ? 'O dragão tombou em chamas... a princesa está salva! 🏰'
+                : `Você venceu <strong>${enemy.name}</strong>!<br>+${enemy.xp} XP • +${enemy.gold} ouro`;
+            el('battleWinOverlay').classList.add('visible');
+            updateHeroUI();
+        }, 1000);
+    }
+
+    function afterBattleWin() {
+        el('battleWinOverlay').classList.remove('visible');
+        if (enemy.boss) {
+            el('finalLevel').textContent = hero.level;
+            el('finalGold').textContent = hero.gold;
+            el('finalWinOverlay').classList.add('visible');
+            return;
+        }
+        enemyIndex++;
+        openShop(true);
+    }
+
+    function openShop(advance) {
+        shopAdvance = !!advance;
+        el('shopGold').textContent = hero.gold;
+        renderShop();
+        el('shopOverlay').classList.add('visible');
+    }
+
+    function renderShop() {
+        el('shopGold').textContent = hero.gold;
+        el('shopGrid').innerHTML = shopItems.map(item => `
+            <div class="shop-item ${hero.gold < item.price ? 'sold-out' : ''}" onclick="buyItem('${item.id}')">
+                <span class="si-icon">${item.icon}</span>
+                <div class="si-name">${item.name}</div>
+                <div class="si-price">🪙 ${item.price}</div>
+                <div class="si-desc">${item.desc}</div>
+            </div>
+        `).join('');
+    }
+
+    function buyItem(id) {
+        const item = shopItems.find(i => i.id === id);
+        if (hero.gold < item.price) return;
+        hero.gold -= item.price;
+        playSound('buy');
+        if (id === 'potion') hero.potions++;
+        if (id === 'ether') hero.mp = Math.min(hero.maxMp, hero.mp + 12);
+        if (id === 'inn') { hero.hp = hero.maxHp; hero.mp = hero.maxMp; }
+        if (id === 'sword') hero.atk += 4;
+        if (id === 'armor') hero.def += 2;
+        if (id === 'maxhp') { hero.maxHp += 20; hero.hp += 20; }
+        renderShop();
+        updateHeroUI();
+    }
+
+    function closeShop() {
+        el('shopOverlay').classList.remove('visible');
+        el('enemyBox').classList.remove('dead');
+        if (shopAdvance) enemyIndex++;
+        spawnEnemy();
+        updateHeroUI();
+        el('heroBox').classList.add('active-turn');
+        busy = false;
+    }
+
+    function gameOver() {
+        el('lastEnemy').textContent = enemy.name;
+        el('gameOverOverlay').classList.add('visible');
+        stopMusic();
+        playSound('enemydies');
+    }
+
+    function startGame() {
+        el('introOverlay').classList.remove('visible');
+        hero = {
+            level: 1, xp: 0, xpNext: 25, gold: 25, potions: 1,
+            maxHp: 80, hp: 80, maxMp: 25, mp: 25,
+            atk: 13, def: 1
+        };
+        enemyIndex = 0;
+        el('battleLog').innerHTML = '';
+        log('🧙 Sua jornada começa. Que os deuses o protejam!', 'log-system');
+        updateHeroUI();
+        spawnEnemy();
+        el('heroBox').classList.add('active-turn');
+        startMusic();
+        busy = false;
+    }
+
+    // Usar poção no meio da batalha via teclado P
+    document.addEventListener('keydown', e => {
+        if (e.key.toLowerCase() === 'p' && !busy && hero) heroPotion();
+    });
+    </script>
+</body>
+</html>
