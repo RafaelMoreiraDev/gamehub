@@ -410,9 +410,9 @@
     }
 
     const DIFFS = {
-        easy:   { trafficGap: 0.45, aiSpeed: 0.82, finish: 11000, nitroDrops: 1.3 },
-        medium: { trafficGap: 0.35, aiSpeed: 0.92, finish: 12500, nitroDrops: 1.0 },
-        hard:   { trafficGap: 0.26, aiSpeed: 1.0,  finish: 14000, nitroDrops: 0.8 }
+        easy:   { trafficGap: 0.45, aiK: 1.0, gaps: [-120, -30, 60], finish: 11000, nitroDrops: 1.3 },
+        medium: { trafficGap: 0.35, aiK: 1.2, gaps: [-80, 30, 120],  finish: 12500, nitroDrops: 1.0 },
+        hard:   { trafficGap: 0.26, aiK: 1.6, gaps: [-20, 90, 200],  finish: 14000, nitroDrops: 0.8 }
     };
 
     const W = 600;
@@ -478,9 +478,9 @@
             tilt: 0
         };
         rivals = [
-            { name: 'FÚRIA',   color: '#ef4444', z: 30,  speed: 170, target: 0, lane: ROAD_X + ROAD_W * 0.2, laneIndex: 0 },
-            { name: 'TITÃ',    color: '#f59e0b', z: 15,  speed: 170, target: 0, lane: ROAD_X + ROAD_W * 0.5, laneIndex: 1 },
-            { name: 'VESPA',   color: '#22c55e', z: 45,  speed: 170, target: 0, lane: ROAD_X + ROAD_W * 0.8, laneIndex: 2 }
+            { name: 'FÚRIA',   color: '#ef4444', z: m.gaps[0], speed: 170, target: 0, lane: ROAD_X + ROAD_W * 0.2, laneIndex: 0, desiredGap: m.gaps[0] },
+            { name: 'TITÃ',    color: '#f59e0b', z: m.gaps[1], speed: 170, target: 0, lane: ROAD_X + ROAD_W * 0.5, laneIndex: 1, desiredGap: m.gaps[1] },
+            { name: 'VESPA',   color: '#22c55e', z: m.gaps[2], speed: 170, target: 0, lane: ROAD_X + ROAD_W * 0.8, laneIndex: 2, desiredGap: m.gaps[2] }
         ];
         traffic = [];
         pickups = [];
@@ -700,10 +700,9 @@
 
         for (const r of rivals) {
             const gap = r.z - p.z;
-            if (gap < -250) r.target = p.speed * 1.5;
-            else if (gap > 350) r.target = p.speed * 0.75;
-            else r.target = p.speed * (DIFFS[diff].aiSpeed + (r.name === 'VESPA' ? 0.04 : r.name === 'FÚRIA' ? 0.02 : 0)) * (0.94 + Math.random() * 0.12);
-            r.speed += (r.target - r.speed) * Math.min(1, dt * 1.5);
+            r.target = p.speed - (gap - r.desiredGap) * m.aiK * (0.9 + Math.random() * 0.2);
+            r.target = Math.max(50, Math.min(780, r.target));
+            r.speed += (r.target - r.speed) * Math.min(1, dt * 2);
             r.speed = Math.max(60, r.speed);
 
             let blocked = false;
