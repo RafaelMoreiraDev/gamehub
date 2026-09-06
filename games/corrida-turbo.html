@@ -410,9 +410,9 @@
     }
 
     const DIFFS = {
-        easy:   { traffic: 0.55, aiSpeed: 0.82, finish: 11000, nitroDrops: 1.3 },
-        medium: { traffic: 0.8,  aiSpeed: 0.92, finish: 12500, nitroDrops: 1.0 },
-        hard:   { traffic: 1.1,  aiSpeed: 1.0,  finish: 14000, nitroDrops: 0.8 }
+        easy:   { trafficGap: 0.45, aiSpeed: 0.82, finish: 11000, nitroDrops: 1.3 },
+        medium: { trafficGap: 0.35, aiSpeed: 0.92, finish: 12500, nitroDrops: 1.0 },
+        hard:   { trafficGap: 0.26, aiSpeed: 1.0,  finish: 14000, nitroDrops: 0.8 }
     };
 
     const W = 600;
@@ -436,6 +436,7 @@
     let pickups = [];
     let particles = [];
     let scroll = 0;
+    let spawnAcc = 0;
     let state = 'menu';
     let stateTimer = 0;
     let raceTime = 0;
@@ -485,6 +486,7 @@
         pickups = [];
         particles = [];
         scroll = 0;
+        spawnAcc = 0;
         raceTime = 0;
         shake = 0;
         zoneFlash = 0;
@@ -532,12 +534,13 @@
         return ROAD_X + ROAD_W * (0.17 + 0.33 * i);
     }
 
-    function spawnTraffic() {
+    function spawnTraffic(dt) {
         const m = DIFFS[diff];
-        if (Math.random() < 0.9 * m.traffic * 0.05) {
+        spawnAcc += dt;
+        if (spawnAcc >= m.trafficGap) {
             const lane = Math.floor(Math.random() * 3);
             const x = laneX(lane) + (Math.random() - 0.5) * 16;
-            const z = player.z + 1200 + Math.random() * 300;
+            const z = player.z + 520 + Math.random() * 260;
             let free = true;
             for (const t of traffic) {
                 if (Math.abs(t.x - x) < 55 && Math.abs(t.z - z) < 190) { free = false; break; }
@@ -548,6 +551,7 @@
                 }
             }
             if (free) {
+                spawnAcc = 0;
                 traffic.push({
                     x: x,
                     z: z,
@@ -560,7 +564,7 @@
         if (Math.random() < 0.004 * DIFFS[diff].nitroDrops) {
             const lane = Math.floor(Math.random() * 3);
             const x = laneX(lane);
-            const z = player.z + 1200 + Math.random() * 300;
+            const z = player.z + 520 + Math.random() * 260;
             let free = true;
             for (const t of traffic) {
                 if (Math.abs(t.x - x) < 55 && Math.abs(t.z - z) < 170) { free = false; break; }
@@ -641,7 +645,7 @@
             zoneFlash = 2;
         }
 
-        spawnTraffic();
+        spawnTraffic(dt);
 
         for (let i = traffic.length - 1; i >= 0; i--) {
             const t = traffic[i];
