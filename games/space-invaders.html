@@ -202,9 +202,14 @@
             100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
         }
 
+        .game-header {
+            position: relative;
+        }
         .back-home {
-            align-self: flex-start;
-            display: inline-block;
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
             background: rgba(255,255,255,0.1);
             color: #a0a0a0;
             padding: 7px 14px;
@@ -213,7 +218,6 @@
             font-size: 0.8rem;
             font-weight: 500;
             transition: all 0.2s ease;
-            margin: 0 0 5px 5px;
         }
         .back-home:hover {
             background: rgba(255,255,255,0.2);
@@ -223,8 +227,8 @@
     </style>
 </head>
 <body>
-    <a href="../index.html" class="back-home" title="Voltar ao GameHub">🏠 Início</a>
     <div class="game-header">
+        <a href="../index.html" class="back-home" title="Voltar ao GameHub">🏠 Início</a>
         <h1 class="game-title">INVASORES ESPACIAIS</h1>
     </div>
     <div class="game-container">
