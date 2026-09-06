@@ -30,7 +30,7 @@
             border-radius: 15px;
             padding: 12px;
             box-shadow: 0 0 50px rgba(59,130,246,0.3);
-            max-width: 560px;
+            max-width: 790px;
             width: 100%;
             position: relative;
         }
@@ -53,6 +53,7 @@
             background: #0f172a;
             border: 2px solid rgba(59,130,246,0.4);
             max-width: 100%;
+            height: auto;
         }
         .controls { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
         .control-btn {
@@ -155,7 +156,7 @@
             <span>SHURIKENS: <span class="stat-value coins" id="coins">0</span></span>
             <span>RECORDE: <span class="stat-value best" id="best">0m</span></span>
         </div>
-        <canvas id="gameCanvas" width="500" height="300"></canvas>
+        <canvas id="gameCanvas" width="720" height="400"></canvas>
         <div class="zone-banner" id="zoneBanner">🌲 FLORESTA</div>
         <div class="game-overlay" id="gameOverOverlay">
             <div class="overlay-title">NINJA CAIU!</div>
@@ -188,7 +189,7 @@
     <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const GROUND = 250;
+    const GROUND = 355;
 
     const diffConfig = {
         easy: { speed: 5, spawnEvery: 95, shurikenChance: 0.15 },
@@ -204,8 +205,8 @@
     let obstacles = [], coins = [], particles = [], clouds = [], hills = [];
     let spawnTimer = 0, coinTimer = 0, speed = 5;
 
-    for (let i = 0; i < 4; i++) clouds.push({ x: Math.random()*500, y: 30+Math.random()*60, s: 0.3+Math.random()*0.3, w: 35+Math.random()*30 });
-    for (let i = 0; i < 6; i++) hills.push({ x: i*130, h: 30+Math.random()*45, w: 100+Math.random()*80 });
+    for (let i = 0; i < 6; i++) clouds.push({ x: Math.random()*720, y: 40+Math.random()*80, s: 0.3+Math.random()*0.3, w: 40+Math.random()*35 });
+    for (let i = 0; i < 8; i++) hills.push({ x: i*150, h: 40+Math.random()*60, w: 130+Math.random()*100 });
 
     document.addEventListener('keydown', e => {
         if (e.key === ' ' || e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') {
@@ -541,19 +542,19 @@
 
         // Lua (floresta)
         if (accent === 'moon') {
-            ctx.shadowBlur = 20; ctx.shadowColor = '#e2e8f0';
+            ctx.shadowBlur = 25; ctx.shadowColor = '#e2e8f0';
             ctx.fillStyle = 'rgba(226,232,240,0.9)';
-            ctx.beginPath(); ctx.arc(420, 55, 24, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(640, 60, 30, 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
             ctx.fillStyle = C('skyTop');
-            ctx.beginPath(); ctx.arc(410, 48, 20, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(627, 51, 25, 0, Math.PI * 2); ctx.fill();
         }
 
         // Sol se pondo (colinas)
         if (accent === 'sunset') {
-            ctx.shadowBlur = 40; ctx.shadowColor = '#f97316';
+            ctx.shadowBlur = 50; ctx.shadowColor = '#f97316';
             ctx.fillStyle = 'rgba(249,115,22,0.9)';
-            ctx.beginPath(); ctx.arc(400, GROUND - 20, 45, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(640, GROUND - 25, 55, 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
         }
 
