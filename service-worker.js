@@ -1,5 +1,5 @@
-const CACHE = 'gamehub-v2';
-const CORE = ['/', '/index.html', '/css/style.css?v=3.5', '/js/main.js?v=3.9', '/js/analytics.js?v=1', '/manifest.json', '/img/icon-192.png', '/img/icon-512.png'];
+const CACHE = 'gamehub-v3';
+const CORE = ['/', '/index.html', '/css/style.css?v=3.6', '/js/main.js?v=3.9', '/js/analytics.js?v=1', '/manifest.json', '/img/icon-192.png', '/img/icon-512.png'];
 
 self.addEventListener('install', event => {
     event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));

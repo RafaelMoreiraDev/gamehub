@@ -26,6 +26,15 @@ body {
     overflow-x: hidden;
 }
 
+html,
+body,
+main {
+    width: 100%;
+    max-width: 100%;
+}
+
+html { overflow-x: clip; }
+
 /* Acessibilidade */
 .sr-only {
     position: absolute;
@@ -763,11 +772,14 @@ section {
 
 .popular-section {
     background: var(--darker-bg);
-    overflow: hidden;
+    max-width: 100%;
+    overflow-x: clip;
+    contain: inline-size;
 }
 
 .carousel-container {
     position: relative;
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -1165,20 +1177,30 @@ section {
 /* Responsive */
 @media (max-width: 768px) {
     .navbar {
-        flex-wrap: wrap;
+        left: 0;
+        right: auto;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        width: 100vw;
+        max-width: 100vw;
         padding: 1rem;
     }
 
     .nav-search {
         order: 3;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 44px;
         width: 100%;
+        max-width: 100%;
+        min-width: 0;
         margin-top: 0.75rem;
     }
 
     .nav-search input,
     .nav-search input:focus {
-        flex: 1 1 auto;
+        display: block;
         width: auto;
+        max-width: 100%;
         min-width: 0;
     }
 
@@ -1198,6 +1220,13 @@ section {
         text-align: center;
         padding-top: 145px;
         gap: 2rem;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .hero-content {
+        width: 100%;
+        min-width: 0;
     }
     
     .hero-title {
@@ -1205,15 +1234,27 @@ section {
     }
     
     .hero-stats {
-        justify-content: center;
+        width: 100%;
+        justify-content: space-evenly;
+        gap: 0.75rem;
     }
+
+    .stat { min-width: 0; }
     
     .hero-visual {
         width: 100%;
+        min-width: 0;
         max-width: 360px;
         height: 420px;
         margin: 0 auto;
     }
+
+    .popular-carousel {
+        max-width: 100%;
+        scrollbar-width: none;
+    }
+
+    .popular-carousel::-webkit-scrollbar { display: none; }
     
     .hero-preview-card {
         width: 280px;
