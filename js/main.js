@@ -456,8 +456,6 @@ const gamesDatabase = [
         title: "Corrida Maluca",
         category: "corrida",
         icon: "🏎️",
-        rating: 4.6,
-        plays: 12350,
         badge: "new",
         description: "Desvie do tráfego, colete moedas e sobreviva à velocidade!",
         color: "#4ecdc4",
@@ -469,8 +467,6 @@ const gamesDatabase = [
         title: "Quebra-Cabeça Mental",
         category: "puzzle",
         icon: "🧩",
-        rating: 4.9,
-        plays: 8920,
         badge: "top",
         description: "Quebra-cabeça deslizante com arte neon e recorde de movimentos.",
         color: "#ffe66d",
@@ -482,8 +478,6 @@ const gamesDatabase = [
         title: "Missão do Dragão",
         category: "rpg",
         icon: "🐉",
-        rating: 4.7,
-        plays: 20100,
         badge: "new",
         description: "RPG de batalhas por turnos! Evolua, compre equipamentos e derrote o dragão Ignaros.",
         color: "#a855f7",
@@ -495,8 +489,6 @@ const gamesDatabase = [
         title: "Estrelas do Futebol",
         category: "esportes",
         icon: "⚽",
-        rating: 4.5,
-        plays: 18750,
         badge: "new",
         description: "Copa dos Pênaltis! Mire, dê o efeito e vença goleiros cada vez melhores.",
         color: "#22c55e",
@@ -508,8 +500,6 @@ const gamesDatabase = [
         title: "Corrida Ninja",
         category: "aventura",
         icon: "🥷",
-        rating: 4.8,
-        plays: 16800,
         badge: "new",
         description: "Corra, pule (até 2x!) e colete shurikens douradas. Com recorde salvo!",
         color: "#3b82f6",
@@ -521,8 +511,6 @@ const gamesDatabase = [
         title: "Sobrevivência Zumbi",
         category: "acao",
         icon: "🧟",
-        rating: 4.4,
-        plays: 14200,
         badge: "new",
         description: "Sobreviva a ondas infinitas de zumbis! Atire, colete power-ups e bata recordes.",
         color: "#ef4444",
@@ -534,8 +522,6 @@ const gamesDatabase = [
         title: "Minas de Cristal",
         category: "puzzle",
         icon: "💎",
-        rating: 4.6,
-        plays: 9800,
         badge: "new",
         description: "Campo minado de cristais! Bandeiras, números e recorde de tempo.",
         color: "#06b6d4",
@@ -547,8 +533,6 @@ const gamesDatabase = [
         title: "Batalha de Monstros",
         category: "rpg",
         icon: "👾",
-        rating: 4.7,
-        plays: 22500,
         badge: "popular",
         description: "RPG de turnos! Escolha seu monstro, domine os elementos e vença arenas infinitas.",
         color: "#8b5cf6",
@@ -560,8 +544,6 @@ const gamesDatabase = [
         title: "Lutador de Rua",
         category: "acao",
         icon: "🥊",
-        rating: 4.9,
-        plays: 25000,
         badge: "top",
         description: "Jogo de luta arcade! Socos, chutes, especiais e melhor de 3 rounds.",
         color: "#f97316",
@@ -573,8 +555,6 @@ const gamesDatabase = [
         title: "Mestre do Drift",
         category: "corrida",
         icon: "🏁",
-        rating: 4.5,
-        plays: 11200,
         badge: null,
         description: "Domine a arte do drift nas pistas mais difíceis.",
         color: "#ec4899",
@@ -585,8 +565,6 @@ const gamesDatabase = [
         title: "Caça ao Tesouro",
         category: "aventura",
         icon: "🗺️",
-        rating: 4.3,
-        plays: 7600,
         badge: "new",
         description: "Cave na ilha, siga o detector de proximidade e ache os baús!",
         color: "#84cc16",
@@ -598,8 +576,6 @@ const gamesDatabase = [
         title: "Basquete Pro",
         category: "esportes",
         icon: "🏀",
-        rating: 4.6,
-        plays: 13400,
         badge: "new",
         description: "Arremessos com física real! Tabela, rede e bola dourada.",
         color: "#f59e0b",
@@ -611,8 +587,6 @@ const gamesDatabase = [
         title: "Espadas Mágicas",
         category: "rpg",
         icon: "⚔️",
-        rating: 4.8,
-        plays: 19800,
         badge: "popular",
         description: "Arena de ação! Colete espadas flamejantes, gélidas, elétricas e sombrias.",
         color: "#14b8a6",
@@ -624,8 +598,6 @@ const gamesDatabase = [
         title: "Mania do Puzzle",
         category: "puzzle",
         icon: "🎯",
-        rating: 4.4,
-        plays: 6500,
         badge: "new",
         description: "Encaixe blocos, complete linhas e faça combos infinitos!",
         color: "#e11d48",
@@ -637,8 +609,6 @@ const gamesDatabase = [
         title: "Corrida Turbo",
         category: "corrida",
         icon: "🚗",
-        rating: 4.7,
-        plays: 15600,
         badge: "top",
         description: "Corrida contra 3 pilotos! Desvie do trânsito, use nitro e vença.",
         color: "#7c3aed",
@@ -650,8 +620,6 @@ const gamesDatabase = [
         title: "Aventuras Piratas",
         category: "aventura",
         icon: "🏴‍☠️",
-        rating: 4.5,
-        plays: 11900,
         badge: "new",
         description: "Navegue os mares, colete tesouros e afunde navios inimigos!",
         color: "#0891b2",
@@ -663,8 +631,6 @@ const gamesDatabase = [
         title: "Campeão de Tênis",
         category: "esportes",
         icon: "🎾",
-        rating: 4.3,
-        plays: 8200,
         badge: "new",
         description: "Tênis arcade com efeito e placar real. Melhor de 3 games!",
         color: "#65a30d",
@@ -676,8 +642,6 @@ const gamesDatabase = [
         title: "Pong",
         category: "esportes",
         icon: "🏓",
-        rating: 4.7,
-        plays: 28500,
         badge: "top",
         description: "O clássico jogo de tênis de mesa. Desafie a CPU ou um amigo!",
         color: "#00f5ff",
@@ -689,8 +653,6 @@ const gamesDatabase = [
         title: "Memória",
         category: "puzzle",
         icon: "🃏",
-        rating: 4.6,
-        plays: 19200,
         badge: "new",
         description: "Encontre todos os pares de cartas iguais! Teste sua memória.",
         color: "#f093fb",
@@ -702,8 +664,6 @@ const gamesDatabase = [
         title: "Quiz do Conhecimento",
         category: "puzzle",
         icon: "🧠",
-        rating: 4.8,
-        plays: 24500,
         badge: "popular",
         description: "Teste seus conhecimentos! 6 categorias com mais de 60 perguntas.",
         color: "#4facfe",
@@ -715,8 +675,6 @@ const gamesDatabase = [
         title: "Invasores Espaciais",
         category: "acao",
         icon: "🚀",
-        rating: 4.9,
-        plays: 32100,
         badge: "top",
         description: "Defenda a Terra dos alienígenas! 6 níveis com chefes.",
         color: "#00ff88",
@@ -728,8 +686,6 @@ const gamesDatabase = [
         title: "Cobrinha",
         category: "puzzle",
         icon: "🐍",
-        rating: 4.9,
-        plays: 42000,
         badge: "popular",
         description: "O clássico viciante da cobrinha! Coma maçãs e bata seu recorde.",
         color: "#22c55e",
@@ -741,8 +697,6 @@ const gamesDatabase = [
         title: "Flappy Bird",
         category: "acao",
         icon: "🐦",
-        rating: 4.5,
-        plays: 35800,
         badge: "new",
         description: "Voe entre os canos! Um toque, mil frustrações — o mais difícil do site!",
         color: "#4facfe",
@@ -786,16 +740,23 @@ document.addEventListener('DOMContentLoaded', function() {
     renderFeaturedGame();
     animateStats();
     initEventListeners();
+
+    const query = new URLSearchParams(window.location.search).get('busca');
+    if (query) {
+        searchInput.value = query;
+        performSearch();
+        document.getElementById('games').scrollIntoView();
+    }
 });
 
 // Renderizar Categorias
 function renderCategories() {
     categoriesGrid.innerHTML = categories.map(cat => `
-        <div class="category-card" onclick="filterByCategory('${cat.category}')">
+        <button type="button" class="category-card" onclick="filterByCategory('${cat.category}')" aria-label="Ver ${cat.count} jogos de ${cat.name}">
             <div class="category-icon">${cat.icon}</div>
             <div class="category-name">${cat.name}</div>
             <div class="category-count">${cat.count} jogos</div>
-        </div>
+        </button>
     `).join('');
 }
 
@@ -815,8 +776,10 @@ function renderGames(games) {
         const badge = !isReady 
             ? `<span class="game-badge badge-soon">EM BREVE</span>` 
             : (game.badge ? `<span class="game-badge badge-${game.badge}">${game.badge.toUpperCase()}</span>` : '');
+        const tag = isReady ? 'a' : 'div';
+        const link = isReady ? ` href="${game.gameFile}"` : '';
         return `
-        <div class="game-card ${isReady ? '' : 'soon'}" onclick="openGame(${game.id})">
+        <${tag} class="game-card ${isReady ? '' : 'soon'}"${link}${isReady ? '' : ` role="status" aria-label="${game.title}, em breve"`}>
             ${badge}
             <div class="game-thumbnail" style="${thumbStyle}">
                 ${!thumbUrl ? `<span>${game.icon}</span>` : ''}
@@ -825,15 +788,11 @@ function renderGames(games) {
                 <h3 class="game-title">${game.title}</h3>
                 <p class="game-category">${getCategoryName(game.category)}</p>
                 <div class="game-stats">
-                    <div class="game-rating">
-                        <span>⭐</span>
-                        <span>${game.rating}</span>
-                    </div>
-                    <span class="game-plays">${isReady ? formatNumber(game.plays) + ' jogadas' : 'em desenvolvimento'}</span>
+                    <span class="game-plays">${isReady ? 'Grátis • sem cadastro' : 'Em desenvolvimento'}</span>
                 </div>
             </div>
-            ${isReady ? `<button class="play-button" onclick="event.stopPropagation(); openGame(${game.id})">▶</button>` : ''}
-        </div>
+            ${isReady ? `<span class="play-button" aria-hidden="true">▶</span>` : ''}
+        </${tag}>
         `;
     }).join('');
 }
@@ -846,7 +805,7 @@ function renderPopularGames() {
         const thumbUrl = game.thumbnail ? safeThumb(game.thumbnail) : null;
         const thumbStyle = thumbUrl ? `background-image: url(${thumbUrl}); background-size: cover; background-position: center;` : `background: linear-gradient(135deg, ${game.color} 0%, ${adjustColor(game.color, -30)} 100%);`;
         return `
-        <div class="popular-game" onclick="openGame(${game.id})">
+        <a class="popular-game" href="${game.gameFile}">
             ${game.badge ? `<span class="game-badge badge-${game.badge}">${game.badge.toUpperCase()}</span>` : ''}
             <div class="game-thumbnail" style="${thumbStyle}">
                 ${!thumbUrl ? `<span>${game.icon}</span>` : ''}
@@ -855,14 +814,10 @@ function renderPopularGames() {
                 <h3 class="game-title">${game.title}</h3>
                 <p class="game-category">${getCategoryName(game.category)}</p>
                 <div class="game-stats">
-                    <div class="game-rating">
-                        <span>⭐</span>
-                        <span>${game.rating}</span>
-                    </div>
-                    <span class="game-plays">${formatNumber(game.plays)} jogadas</span>
+                    <span class="game-plays">Jogar grátis</span>
                 </div>
             </div>
-        </div>
+        </a>
         `;
     }).join('');
 }
@@ -882,19 +837,19 @@ function renderFeaturedGame() {
             <p class="featured-description">${featured.description}</p>
             <div class="featured-stats">
                 <div class="featured-stat">
-                    <span class="featured-stat-value">⭐ ${featured.rating}</span>
-                    <span class="featured-stat-label">Avaliação</span>
+                    <span class="featured-stat-value">Grátis</span>
+                    <span class="featured-stat-label">Preço</span>
                 </div>
                 <div class="featured-stat">
-                    <span class="featured-stat-value">${formatNumber(featured.plays)}</span>
-                    <span class="featured-stat-label">Jogadas</span>
+                    <span class="featured-stat-value">Sem cadastro</span>
+                    <span class="featured-stat-label">Acesso</span>
                 </div>
                 <div class="featured-stat">
                     <span class="featured-stat-value">${getCategoryName(featured.category)}</span>
                     <span class="featured-stat-label">Categoria</span>
                 </div>
             </div>
-            <button class="cta-button" onclick="openGame(${featured.id})">Jogar Agora</button>
+            <a class="cta-button" href="${featured.gameFile}">Jogar Agora</a>
         </div>
     `;
 }
@@ -903,7 +858,6 @@ function renderFeaturedGame() {
 function animateStats() {
     animateNumber('totalGames', gamesDatabase.length);
     animateNumber('totalCategories', categories.length);
-    animateNumber('totalPlayers', 1250000);
 }
 
 function animateNumber(elementId, target) {
@@ -1012,9 +966,9 @@ function openGame(gameId) {
     const game = gamesDatabase.find(g => g.id === gameId);
     if (!game) return;
     
-    // Jogo jogável: abrir em nova aba (com versão para quebrar cache)
+    // Jogo jogável: manter a navegação na mesma aba para preservar o fluxo e o botão Voltar.
     if (game.gameFile) {
-        window.open(game.gameFile + '?v=3', '_blank');
+        window.location.href = game.gameFile;
         return;
     }
     
