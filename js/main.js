@@ -738,6 +738,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderGames(gamesDatabase);
     renderPopularGames();
     renderFeaturedGame();
+    renderGrowthModules();
     animateStats();
     initEventListeners();
 
@@ -748,6 +749,25 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('games').scrollIntoView();
     }
 });
+
+function renderGrowthModules() {
+    const readyGames = gamesDatabase.filter(game => game.gameFile);
+    const dayNumber = Math.floor(Date.now() / 86400000);
+    const daily = readyGames[dayNumber % readyGames.length];
+    const lastPath = localStorage.getItem('gamehub:lastGame');
+    const lastGame = readyGames.find(game => `/${game.gameFile}` === lastPath || lastPath?.endsWith(game.gameFile));
+    const section = document.createElement('section');
+    section.className = 'return-section';
+    section.setAttribute('aria-label', 'Desafios e jogos recentes');
+    section.innerHTML = `
+        <a class="return-card daily-card" href="${daily.gameFile}?desafio=diario">
+            <span class="return-icon">🔥</span>
+            <span><strong>Desafio do dia</strong><small>${daily.title} — até onde você consegue chegar?</small></span>
+        </a>
+        ${lastGame ? `<a class="return-card" href="${lastGame.gameFile}"><span class="return-icon">↻</span><span><strong>Continue jogando</strong><small>${lastGame.title}</small></span></a>` : ''}
+    `;
+    document.getElementById('popular').insertAdjacentElement('beforebegin', section);
+}
 
 // Renderizar Categorias
 function renderCategories() {
@@ -893,6 +913,7 @@ function initEventListeners() {
             this.classList.add('active');
             
             const category = this.dataset.category;
+            window.gamehubTrack?.('filter_category', { category });
             const filtered = category === 'all' 
                 ? gamesDatabase 
                 : gamesDatabase.filter(game => game.category === category);
@@ -928,6 +949,7 @@ function initEventListeners() {
 // Busca
 function performSearch() {
     const query = searchInput.value.toLowerCase().trim();
+    window.gamehubTrack?.('search_game', { query, hasQuery: Boolean(query) });
     
     if (!query) {
         renderGames(gamesDatabase);
@@ -968,6 +990,7 @@ function openGame(gameId) {
     
     // Jogo jogável: manter a navegação na mesma aba para preservar o fluxo e o botão Voltar.
     if (game.gameFile) {
+        window.gamehubTrack?.('game_open', { href: game.gameFile, game: game.title });
         window.location.href = game.gameFile;
         return;
     }

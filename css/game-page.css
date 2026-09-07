@@ -1,0 +1,20 @@
+.gamehub-game-content {
+    width: min(820px, calc(100% - 30px));
+    margin: 28px auto 90px;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.28);
+    color: #d8d8e8;
+    font: 400 16px/1.65 Arial, sans-serif;
+}
+
+.gamehub-game-content h2 { color: #4ecdc4; font-size: 1.35rem; margin: 0 0 10px; }
+.gamehub-game-content h3 { color: #fff; font-size: 1rem; margin: 20px 0 7px; }
+.gamehub-game-content p { margin: 0 0 10px; }
+.gamehub-game-content a { color: #4ecdc4; }
+.gamehub-related { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+
+@media (max-width: 600px) {
+    .gamehub-game-content { padding: 18px; margin-bottom: 110px; font-size: 15px; }
+}

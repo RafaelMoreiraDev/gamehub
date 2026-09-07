@@ -734,6 +734,33 @@ section {
 }
 
 /* Popular Carousel */
+.return-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    padding: 1.5rem 5%;
+    background: var(--darker-bg);
+}
+
+.return-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem 1.4rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 15px;
+    color: white;
+    text-decoration: none;
+    background: var(--card-bg);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.return-card:hover { transform: translateY(-3px); border-color: var(--secondary-color); }
+.return-icon { font-size: 2rem; }
+.return-card strong, .return-card small { display: block; }
+.return-card small { margin-top: 0.35rem; color: var(--text-muted); }
+.daily-card { border-color: rgba(255, 107, 107, 0.55); }
+
 .popular-section {
     background: var(--darker-bg);
     overflow: hidden;

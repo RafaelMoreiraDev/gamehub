@@ -32,6 +32,20 @@ Implementado no código após a auditoria:
 
 Ainda requer uma próxima etapa: escolher/conectar analytics, criar imagens sociais individuais, instrumentar eventos internos de cada jogo e fazer a adaptação completa dos controles móveis.
 
+### Segunda etapa implementada
+
+- camada de eventos para página, abertura, início, fim, replay, busca, filtro e compartilhamento, armazenada localmente e pronta para encaminhamento via `dataLayer`;
+- botão “Desafiar um amigo” integrado às telas de resultado compatíveis;
+- recomendações de próximos jogos após a partida;
+- desafio diário e “Continue jogando” na página inicial;
+- controles por toque para Cobrinha, Flappy Bird, Invasores Espaciais, Corrida Maluca e Corrida Turbo;
+- imagens Open Graph individuais, otimizadas em 1200×630, para os 22 jogos;
+- conteúdo indexável de instruções e jogos relacionados em todas as páginas;
+- manifesto instalável, ícones reais e service worker com suporte offline;
+- política de privacidade corrigida para refletir a coleta local atual.
+
+Pendente de credenciais externas: conectar a camada de eventos a uma propriedade de analytics e operar o Google Search Console.
+
 ## Evidências verificadas
 
 - 22 páginas de jogos estão no repositório e no sitemap.
