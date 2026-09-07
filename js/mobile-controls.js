@@ -17,9 +17,18 @@
             .mobile-controls__button--left { grid-column:1; grid-row:2; }
             .mobile-controls__button--down { grid-column:2; grid-row:2; }
             .mobile-controls__button--right { grid-column:3; grid-row:2; }
+            .mobile-controls__dpad--horizontal { grid-template-columns:repeat(2,var(--control-size)); grid-template-rows:var(--control-size); }
+            .mobile-controls__dpad--horizontal .mobile-controls__button--left { grid-column:1; grid-row:1; }
+            .mobile-controls__dpad--horizontal .mobile-controls__button--right { grid-column:2; grid-row:1; }
+            .mobile-controls__dpad--vertical { grid-template-columns:var(--control-size); grid-template-rows:repeat(2,var(--control-size)); }
+            .mobile-controls__dpad--vertical .mobile-controls__button--up,
+            .mobile-controls__dpad--vertical .mobile-controls__button--down { grid-column:1; }
+            .mobile-controls__dpad--vertical .mobile-controls__button--up { grid-row:1; }
+            .mobile-controls__dpad--vertical .mobile-controls__button--down { grid-row:2; }
             .mobile-controls__button--action { border-radius:50%; background:linear-gradient(145deg,#ff6b6b,#a83f64); font-size:clamp(13px,3.8vw,17px); text-align:center; overflow-wrap:anywhere; }
             .mobile-controls--actions-only { justify-content:flex-end; }
             .mobile-controls--dpad-only { justify-content:flex-start; }
+            @media (pointer:coarse), (max-width:768px) { .game-container > .instructions { display:none; } }
             @media (min-width:769px), (pointer:fine) { .mobile-controls[data-mobile-only="true"] { display:none; } }
             @media (max-width:380px) { .mobile-controls { --control-size:56px; gap:10px; } .mobile-controls__actions { gap:7px; } }
         `;
@@ -29,6 +38,7 @@
     function MobileControls(options = {}) {
         installStyles();
         const showDpad = options.showDpad !== false;
+        const enabledDirections = new Set(Array.isArray(options.directions) ? options.directions : directions.map(([id]) => id));
         const configuredButtons = Array.isArray(options.buttons) ? options.buttons.slice(0, 2) : [];
         const enabledButtons = configuredButtons.filter(button => button && button.id && button.hidden !== true);
         const mount = options.mount || document.body;
@@ -70,8 +80,11 @@
         if (showDpad) {
             const dpad = document.createElement('div');
             dpad.className = 'mobile-controls__dpad';
+            const directionIds = [...enabledDirections];
+            if (directionIds.length === 2 && directionIds.every(id => ['left', 'right'].includes(id))) dpad.classList.add('mobile-controls__dpad--horizontal');
+            if (directionIds.length === 2 && directionIds.every(id => ['up', 'down'].includes(id))) dpad.classList.add('mobile-controls__dpad--vertical');
             dpad.setAttribute('aria-label', 'Direcional');
-            directions.forEach(([id, symbol, label]) => {
+            directions.filter(([id]) => enabledDirections.has(id)).forEach(([id, symbol, label]) => {
                 const cap = id[0].toUpperCase() + id.slice(1);
                 const button = makeButton({ id, label: symbol, className: `mobile-controls__button--${id}`, onPress: options[`on${cap}`], onRelease: options[`on${cap}Release`] });
                 button.setAttribute('aria-label', label);
