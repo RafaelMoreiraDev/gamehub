@@ -585,7 +585,8 @@
 
     function cellSize() {
         const maxW = Math.min(560, window.innerWidth - 90);
-        return Math.max(22, Math.floor(maxW / cols));
+        const maxH = Math.max(260, window.innerHeight - 400);
+        return Math.max(22, Math.floor(Math.min(maxW / cols, maxH / rows)));
     }
 
     function numClass(d) {

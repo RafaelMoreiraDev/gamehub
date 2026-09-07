@@ -793,6 +793,7 @@
         ctx.lineWidth = 1.5;
         ctx.stroke();
         if (isPlayer) {
+            ctx.fillStyle = '#ffffff';
             ctx.font = '16px serif';
             ctx.textAlign = 'center';
             ctx.fillText('🏴‍☠️', 2, -60);
@@ -862,7 +863,9 @@
                 ctx.beginPath();
                 ctx.ellipse(o.x, o.y + 18, 32, 5, 0, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.fillStyle = '#ffffff';
             } else {
+                ctx.fillStyle = '#ffffff';
                 ctx.font = '34px serif';
                 ctx.textAlign = 'center';
                 ctx.fillText('💣', o.x, o.y + 10 + bobY);
@@ -871,6 +874,7 @@
 
         for (const l of loot) {
             const bobY = Math.sin(l.bob) * 4;
+            ctx.fillStyle = '#ffffff';
             ctx.font = l.kind === 'coin' ? '26px serif' : '30px serif';
             ctx.textAlign = 'center';
             if (l.kind === 'coin') {
@@ -919,6 +923,7 @@
 
         if (ship) {
             for (let i = 0; i < 3; i++) {
+                ctx.fillStyle = '#ffffff';
                 ctx.font = '20px serif';
                 ctx.textAlign = 'center';
                 ctx.globalAlpha = i < lives ? 1 : 0.2;
