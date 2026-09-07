@@ -1168,6 +1168,26 @@ section {
         flex-wrap: wrap;
         padding: 1rem;
     }
+
+    .nav-search {
+        order: 3;
+        width: 100%;
+        margin-top: 0.75rem;
+    }
+
+    .nav-search input,
+    .nav-search input:focus {
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+    }
+
+    .nav-search button {
+        flex: 0 0 44px;
+        width: 44px;
+        min-width: 44px;
+        padding: 0.5rem;
+    }
     
     .nav-links {
         display: none;
@@ -1176,7 +1196,7 @@ section {
     .hero {
         flex-direction: column;
         text-align: center;
-        padding-top: 100px;
+        padding-top: 145px;
         gap: 2rem;
     }
     
