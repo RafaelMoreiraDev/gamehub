@@ -53,7 +53,7 @@ Get-ChildItem -LiteralPath $gamesPath -Filter '*.html' | ForEach-Object {
     }
 
     if ($html -notmatch 'js/game-share\.js') {
-        $html = $html.Replace('</body>', '    <script src="../js/analytics.js?v=1"></script>' + "`r`n    " + '<script src="../js/game-share.js?v=3"></script>' + "`r`n    " + '<script src="../js/mobile-controls.js?v=1"></script>' + "`r`n</body>")
+        $html = $html.Replace('</body>', '    <script src="../js/analytics.js?v=1"></script>' + "`r`n    " + '<script src="../js/game-share.js?v=4"></script>' + "`r`n    " + '<script src="../js/mobile-controls.js?v=2"></script>' + "`r`n</body>")
     }
 
     if ($html -notmatch 'game-page\.css') {

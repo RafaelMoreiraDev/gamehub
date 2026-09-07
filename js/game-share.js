@@ -56,7 +56,7 @@
         .gamehub-challenge { width: min(680px,calc(100% - 30px)); margin: 8px auto 14px; padding: 12px 16px; border: 1px solid #ffe66d; border-radius: 12px; background: rgba(255,230,109,.12); color: #fff; text-align: center; font: 700 14px/1.4 Arial,sans-serif; }
         .gamehub-next { margin: 14px auto 4px; color: #fff; font: 700 13px/1.5 Arial,sans-serif; text-align: center; }
         .gamehub-next a { color: #4ecdc4; margin: 0 6px; }
-        @media (pointer: coarse) { .gamehub-share:not(.gamehub-share-inline) { display: none; } }
+        @media (pointer: coarse), (max-width: 768px) { .gamehub-share:not(.gamehub-share-inline) { display: none; } }
     `;
     document.head.appendChild(style);
 

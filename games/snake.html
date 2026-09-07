@@ -113,6 +113,11 @@
         }
         .instructions h3 { font-family: 'Press Start 2P', cursive; font-size: 0.5rem; color: #22c55e; margin-bottom: 6px; }
         .key { background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 5px; font-family: 'Press Start 2P', cursive; font-size: 0.5rem; }
+        @media (pointer: coarse), (max-width: 768px) {
+            .instructions { display: none; }
+            .game-header { width: 100%; padding: 0; display: flex; flex-direction: column; align-items: center; }
+            .back-home { position: static; align-self: flex-start; transform: none; margin-bottom: 8px; }
+        }
         .game-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -247,15 +252,20 @@
     }
     function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
 
+    function setSnakeDirection(direction) {
+        const map = { up:{x:0,y:-1}, down:{x:0,y:1}, left:{x:-1,y:0}, right:{x:1,y:0} };
+        const nd = map[direction];
+        if (nd && (nd.x !== -gs.dir.x || nd.y !== -gs.dir.y)) gs.nextDir = nd;
+    }
+    window.snakeSetDirection = setSnakeDirection;
+
     document.addEventListener('keydown', e => {
         const k = e.key;
-        const map = { ArrowUp:{x:0,y:-1}, ArrowDown:{x:0,y:1}, ArrowLeft:{x:-1,y:0}, ArrowRight:{x:1,y:0},
-                      w:{x:0,y:-1}, s:{x:0,y:1}, a:{x:-1,y:0}, d:{x:1,y:0} };
+        const map = { ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right',
+                      w:'up', s:'down', a:'left', d:'right' };
         if (map[k]) {
             e.preventDefault();
-            const nd = map[k];
-            // Não permite reverter 180°
-            if (nd.x !== -gs.dir.x || nd.y !== -gs.dir.y) gs.nextDir = nd;
+            setSnakeDirection(map[k]);
         }
         if (k === 'p' || k === 'P') { if (gs.playing) togglePause(); }
         if (k === ' ' && !gs.playing) startGame();
@@ -517,7 +527,8 @@
         <nav class="gamehub-related" aria-label="Jogos relacionados"><a href="snake.html">Cobrinha</a><a href="quiz.html">Quiz</a><a href="space-invaders.html">Invasores Espaciais</a><a href="../index.html#games">Ver todos</a></nav>
     </section>
     <script src="../js/analytics.js?v=1"></script>
-    <script src="../js/game-share.js?v=3"></script>
-    <script src="../js/mobile-controls.js?v=1"></script>
+    <script src="../js/game-share.js?v=4"></script>
+    <script src="../js/mobile-controls.js?v=2"></script>
+    <script src="../js/game-controls/snake-controls.js?v=1"></script>
 </body>
 </html>
