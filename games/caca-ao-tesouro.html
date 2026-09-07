@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caça ao Tesouro - GameHub</title>
+    <meta name="description" content="Jogue Caça ao Tesouro online grátis! Cave na ilha misteriosa, siga o detector de proximidade e encontre todos os baús de tesouro. Evite as armadilhas! Sem download!">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%8E%AE</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a2e 50%, #24243e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Roboto', sans-serif;
+            color: white;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .game-header {
+            position: relative;
+            padding-left: 100px;
+            padding-right: 100px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .back-home {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.1);
+            color: #a0a0c0;
+            padding: 7px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .back-home:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, #84cc16, #fbbf24, #fde68a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+            animation: glow 2.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 5px rgba(132,204,22,0.6)); }
+            to { filter: drop-shadow(0 0 22px rgba(251,191,36,0.8)); }
+        }
+
+        .game-subtitle {
+            color: #a0a0c0;
+            font-size: 0.85rem;
+        }
+
+        .game-container {
+            background: rgba(0,0,0,0.5);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 0 50px rgba(132,204,22,0.25), inset 0 0 30px rgba(0,0,0,0.4);
+            max-width: 640px;
+            width: 100%;
+            position: relative;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 14px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .stat-item { text-align: center; }
+
+        .stat-label {
+            font-size: 0.55rem;
+            color: #a0a0c0;
+            margin-bottom: 6px;
+        }
+
+        .stat-value { font-size: 1rem; color: #fbbf24; }
+        .stat-value.shovels { color: #d97706; }
+        .stat-value.best { color: #bef264; font-size: 0.85rem; }
+
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .diff-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            padding: 10px 14px;
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            color: #a0a0c0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .diff-btn:hover { border-color: #84cc16; color: white; }
+
+        .diff-btn.easy.active { border-color: #22c55e; background: rgba(34,197,94,0.2); color: #86efac; }
+        .diff-btn.medium.active { border-color: #fbbf24; background: rgba(251,191,36,0.2); color: #fde68a; }
+        .diff-btn.hard.active { border-color: #ef4444; background: rgba(239,68,68,0.2); color: #fca5a5; }
+
+        .board-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 14px;
+            position: relative;
+        }
+
+        #board {
+            display: grid;
+            gap: 4px;
+            background: rgba(255,255,255,0.04);
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.6);
+        }
+
+        .cell {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 6px;
+            background: linear-gradient(145deg, #4a4326, #35301a);
+            box-shadow: inset 0 2px 3px rgba(255,255,255,0.12), inset 0 -2px 4px rgba(0,0,0,0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s ease, background 0.15s ease;
+        }
+
+        .cell:hover:not(.revealed) {
+            transform: scale(1.08);
+            background: linear-gradient(145deg, #5a5230, #453f22);
+        }
+
+        .cell:active:not(.revealed) { transform: scale(0.92); }
+
+        .cell.revealed {
+            background: rgba(20,16,6,0.75);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.7);
+            cursor: default;
+            animation: digPop 0.2s ease;
+        }
+
+        @keyframes digPop {
+            0% { transform: scale(0.7); }
+            70% { transform: scale(1.12); }
+            100% { transform: scale(1); }
+        }
+
+        .cell.dirt {
+            background: linear-gradient(145deg, #2e2412, #1f180c);
+        }
+
+        .cell-num {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.62rem;
+            text-shadow: 0 0 8px currentColor;
+        }
+
+        .hot { color: #f87171; }
+        .warm { color: #fb923c; }
+        .cool { color: #60a5fa; }
+        .cold { color: #93c5fd; }
+
+        .cell.treasure {
+            background: radial-gradient(circle at 35% 30%, #fde68a 0%, #f59e0b 45%, #b45309 100%);
+            animation: treasureFound 0.6s ease;
+        }
+
+        @keyframes treasureFound {
+            0% { transform: scale(0.5) rotate(-10deg); }
+            50% { transform: scale(1.3) rotate(8deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .cell.trap {
+            background: radial-gradient(circle, #7f1d1d 0%, #450a0a 100%);
+        }
+
+        .cell.treasure-cell {
+            font-size: 1.2rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.65rem;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover { transform: translateY(-2px); filter: brightness(1.15); }
+
+        .btn-start { background: linear-gradient(135deg, #84cc16, #4d7c0f); }
+        .btn-reset { background: linear-gradient(135deg, #64748b, #475569); }
+        .btn-music { background: linear-gradient(135deg, #64c8ff, #3b82f6); }
+
+        .instructions {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .instructions h3 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            color: #84cc16;
+            margin-bottom: 8px;
+        }
+
+        .instructions p {
+            color: #a0a0c0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .banner {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            color: #fbbf24;
+            text-shadow: 0 0 25px rgba(251,191,36,0.9);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.35s ease;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .banner.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .end-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5,3,15,0.88);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .end-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .end-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.7rem;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        .end-title.win {
+            background: linear-gradient(90deg, #fde68a, #fbbf24, #bef264);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+
+        .end-title.lose { color: #ef4444; text-shadow: 0 0 25px rgba(239,68,68,0.8); }
+
+        .end-sub {
+            color: #c4b5fd;
+            font-size: 1rem;
+            margin-bottom: 24px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .end-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.75rem;
+            padding: 14px 26px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #84cc16, #f59e0b);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .end-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(132,204,22,0.5); }
+
+        @media (max-width: 600px) {
+            .game-title { font-size: 1.2rem; }
+            .game-header { padding-left: 80px; padding-right: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <a href="../index.html" class="back-home" title="Voltar ao GameHub">🏠 Início</a>
+        <h1 class="game-title">CAÇA AO TESOURO</h1>
+        <p class="game-subtitle">Siga o detector e desenterre os baús! 🗺️</p>
+    </div>
+
+    <div class="game-container">
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-label">TESOUROS</div>
+                <div class="stat-value" id="treasureVal">0/4</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">PÁS</div>
+                <div class="stat-value shovels" id="shovelVal">12</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">NÍVEL</div>
+                <div class="stat-value" id="levelVal">1</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">RECORDE</div>
+                <div class="stat-value best" id="bestVal">--</div>
+            </div>
+        </div>
+
+        <div class="difficulty-selector">
+            <button class="diff-btn easy active" onclick="setDifficulty('easy')">FÁCIL</button>
+            <button class="diff-btn medium" onclick="setDifficulty('medium')">MÉDIO</button>
+            <button class="diff-btn hard" onclick="setDifficulty('hard')">DIFÍCIL</button>
+        </div>
+
+        <div class="board-wrap">
+            <div id="board"></div>
+            <div class="banner" id="banner"></div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn btn-start" onclick="newGame()">CAÇAR</button>
+            <button class="control-btn btn-reset" onclick="newGame(true)">REINICIAR NÍVEL</button>
+            <button class="control-btn btn-music" id="musicBtn" onclick="toggleMusic()">🔊 MÚSICA</button>
+        </div>
+
+        <div class="instructions">
+            <h3>COMO JOGAR</h3>
+            <p>Clique nas areias para cavar. O número revelado é a <b>distância em passos</b> até o tesouro mais próximo (vermelho = quente 🔥, azul = frio ❄️). Cuidado com armadilhas 💀 que custam 2 pás! Encontre todos os baús antes de acabar as pás para avançar de nível.</p>
+        </div>
+    </div>
+
+    <div class="end-overlay" id="endOverlay">
+        <div class="end-title" id="endTitle"></div>
+        <div class="end-sub" id="endSub"></div>
+        <button class="end-btn" onclick="newGame()">CAÇAR DE NOVO</button>
+    </div>
+
+    <script>
+    const AC = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let musicPlaying = false;
+    let musicTimer = null;
+
+    function ensureAudio() {
+        if (!audioCtx) audioCtx = new AC();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function tone(freq, dur, type = 'sine', vol = 0.15, when = 0) {
+        if (!audioCtx || !musicPlaying) return;
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = type;
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(vol, audioCtx.currentTime + when);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + when + dur);
+        o.connect(g);
+        g.connect(audioCtx.destination);
+        o.start(audioCtx.currentTime + when);
+        o.stop(audioCtx.currentTime + when + dur);
+    }
+
+    function playSound(kind) {
+        ensureAudio();
+        const saved = musicPlaying;
+        musicPlaying = true;
+        if (kind === 'dig') tone(180 + Math.random() * 60, 0.08, 'triangle', 0.12);
+        else if (kind === 'treasure') { [660, 880, 1100, 1320].forEach((f, i) => tone(f, 0.14, 'sine', 0.12, i * 0.09)); }
+        else if (kind === 'trap') { tone(200, 0.2, 'sawtooth', 0.15); tone(120, 0.3, 'sawtooth', 0.15, 0.08); }
+        else if (kind === 'level') { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.18, 'triangle', 0.12, i * 0.1)); }
+        else if (kind === 'lose') { [400, 320, 250, 180].forEach((f, i) => tone(f, 0.3, 'sawtooth', 0.12, i * 0.2)); }
+        else if (kind === 'click') tone(400, 0.05, 'square', 0.06);
+        musicPlaying = saved;
+    }
+
+    function startMusicLoop() {
+        stopMusicLoop();
+        const scale = [220, 261.63, 293.66, 349.23, 392, 440];
+        let step = 0;
+        musicTimer = setInterval(() => {
+            if (!musicPlaying || !audioCtx) return;
+            const f = scale[Math.floor(Math.random() * scale.length)];
+            tone(f, 1.5, 'triangle', 0.04);
+            if (step % 3 === 0) tone(f / 2, 2, 'sine', 0.035);
+            step++;
+        }, 900);
+    }
+
+    function stopMusicLoop() { if (musicTimer) { clearInterval(musicTimer); musicTimer = null; } }
+
+    function toggleMusic() {
+        ensureAudio();
+        musicPlaying = !musicPlaying;
+        const btn = document.getElementById('musicBtn');
+        btn.textContent = musicPlaying ? '🔊 MÚSICA' : '🔇 MUDO';
+        btn.style.filter = musicPlaying ? 'brightness(1.1)' : 'brightness(0.6)';
+        if (musicPlaying) startMusicLoop(); else stopMusicLoop();
+    }
+
+    const DIFFS = {
+        easy:   { size: 10, shovels: 14, baseTreasures: 3 },
+        medium: { size: 12, shovels: 12, baseTreasures: 4 },
+        hard:   { size: 14, shovels: 10, baseTreasures: 4 }
+    };
+
+    let diff = 'easy';
+    let rows = 10, cols = 10;
+    let grid = [];
+    let shovels = 14;
+    let treasuresTotal = 4;
+    let treasuresFound = 0;
+    let level = 1;
+    let score = 0;
+    let gameOver = false;
+    let busy = false;
+
+    const board = document.getElementById('board');
+
+    function loadBest() {
+        const b = localStorage.getItem('caca_best_' + diff);
+        document.getElementById('bestVal').textContent = b ? b + ' pts' : '--';
+    }
+
+    function setDifficulty(d) {
+        diff = d;
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.diff-btn.' + d).classList.add('active');
+        loadBest();
+        level = 1;
+        score = 0;
+        newGame();
+    }
+
+    function showBanner(text) {
+        const el = document.getElementById('banner');
+        el.textContent = text;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 1600);
+    }
+
+    function updateStats() {
+        document.getElementById('treasureVal').textContent = treasuresFound + '/' + treasuresTotal;
+        document.getElementById('shovelVal').textContent = shovels;
+        document.getElementById('levelVal').textContent = level;
+    }
+
+    function manhattan(r1, c1, r2, c2) {
+        return Math.abs(r1 - r2) + Math.abs(c1 - c2);
+    }
+
+    function distanceToNearest(r, c) {
+        let best = Infinity;
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                if (grid[i][j].treasure && !grid[i][j].revealed) {
+                    best = Math.min(best, manhattan(r, c, i, j));
+                }
+            }
+        }
+        return best === Infinity ? null : best;
+    }
+
+    function newGame(reset) {
+        playSound('click');
+        gameOver = false;
+        busy = false;
+        if (!reset) {
+            const c = DIFFS[diff];
+            rows = c.size;
+            cols = c.size;
+        }
+        shovels = DIFFS[diff].shovels + Math.floor((level - 1) * 1.5);
+        treasuresTotal = Math.min(DIFFS[diff].baseTreasures + (level - 1), Math.floor(rows * cols / 12));
+        treasuresFound = 0;
+        document.getElementById('endOverlay').classList.remove('show');
+        updateStats();
+
+        grid = [];
+        for (let r = 0; r < rows; r++) {
+            grid[r] = [];
+            for (let c = 0; c < cols; c++) {
+                grid[r][c] = { treasure: false, trap: false, revealed: false, el: null };
+            }
+        }
+
+        let placed = 0;
+        while (placed < treasuresTotal) {
+            const r = Math.floor(Math.random() * rows);
+            const c = Math.floor(Math.random() * cols);
+            if (grid[r][c].treasure) continue;
+            grid[r][c].treasure = true;
+            placed++;
+        }
+        const traps = Math.floor(level * 0.8) + (diff === 'hard' ? 2 : 1);
+        placed = 0;
+        while (placed < traps) {
+            const r = Math.floor(Math.random() * rows);
+            const c = Math.floor(Math.random() * cols);
+            if (grid[r][c].treasure || grid[r][c].trap) continue;
+            grid[r][c].trap = true;
+            placed++;
+        }
+
+        board.innerHTML = '';
+        board.style.gridTemplateColumns = 'repeat(' + cols + ', ' + cellSize() + 'px)';
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const el = document.createElement('div');
+                el.className = 'cell';
+                el.addEventListener('click', () => dig(r, c));
+                grid[r][c].el = el;
+                board.appendChild(el);
+            }
+        }
+    }
+
+    function cellSize() {
+        const maxW = Math.min(560, window.innerWidth - 90);
+        return Math.max(22, Math.floor(maxW / cols));
+    }
+
+    function numClass(d) {
+        if (d <= 2) return 'hot';
+        if (d <= 4) return 'warm';
+        if (d <= 6) return 'cool';
+        return 'cold';
+    }
+
+    function refreshHints() {
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const cell = grid[r][c];
+                if (cell.revealed && !cell.treasure && !cell.trap) {
+                    const d = distanceToNearest(r, c);
+                    if (d !== null) {
+                        cell.el.innerHTML = '<span class="cell-num ' + numClass(d) + '">' + d + '</span>';
+                    } else {
+                        cell.el.innerHTML = '<span class="cell-num cold">·</span>';
+                    }
+                }
+            }
+        }
+    }
+
+    function dig(r, c) {
+        if (gameOver || busy) return;
+        const cell = grid[r][c];
+        if (cell.revealed) return;
+        ensureAudio();
+        cell.revealed = true;
+        shovels--;
+
+        if (cell.treasure) {
+            cell.el.classList.add('revealed', 'treasure');
+            cell.el.innerHTML = '<span class="treasure-cell">💰</span>';
+            playSound('treasure');
+            treasuresFound++;
+            score += 10 * level;
+            refreshHints();
+            updateStats();
+            if (treasuresFound >= treasuresTotal) {
+                levelComplete();
+            }
+        } else if (cell.trap) {
+            cell.el.classList.add('revealed', 'trap');
+            cell.el.innerHTML = '<span class="cell-num hot">💀</span>';
+            playSound('trap');
+            shovels -= 1;
+            showBanner('ARMADILHA! -2 PÁS');
+            updateStats();
+            if (shovels <= 0) endGame();
+        } else {
+            cell.el.classList.add('revealed', 'dirt');
+            const d = distanceToNearest(r, c);
+            if (d !== null) {
+                cell.el.innerHTML = '<span class="cell-num ' + numClass(d) + '">' + d + '</span>';
+            } else {
+                cell.el.innerHTML = '<span class="cell-num cold">·</span>';
+            }
+            playSound('dig');
+            updateStats();
+            if (shovels <= 0) endGame();
+        }
+    }
+
+    function levelComplete() {
+        busy = true;
+        playSound('level');
+        showBanner('NÍVEL ' + level + ' COMPLETO! +BÔNUS');
+        const bonus = shovels * 2;
+        score += bonus;
+        const best = localStorage.getItem('caca_best_' + diff);
+        if (!best || score > parseInt(best)) localStorage.setItem('caca_best_' + diff, score);
+        loadBest();
+        updateStats();
+        level++;
+        setTimeout(() => {
+            busy = false;
+            newGame();
+        }, 1800);
+    }
+
+    function endGame() {
+        gameOver = true;
+        playSound('lose');
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const cell = grid[r][c];
+                if (cell.treasure && !cell.revealed) {
+                    cell.el.classList.add('revealed');
+                    cell.el.innerHTML = '<span class="treasure-cell">🗺️</span>';
+                }
+            }
+        }
+        const overlay = document.getElementById('endOverlay');
+        const title = document.getElementById('endTitle');
+        const sub = document.getElementById('endSub');
+        const best = localStorage.getItem('caca_best_' + diff);
+        let recordMsg = '';
+        if (!best || score > parseInt(best)) {
+            localStorage.setItem('caca_best_' + diff, score);
+            loadBest();
+            recordMsg = '<br>🏆 NOVO RECORDE!';
+        }
+        title.textContent = 'PÁS ACABARAM...';
+        title.className = 'end-title lose';
+        sub.innerHTML = 'Você encontrou <b>' + treasuresFound + '/' + treasuresTotal + '</b> tesouros no nível ' + level + '.<br>Pontuação: <b>' + score + ' pts</b>' + recordMsg;
+        setTimeout(() => overlay.classList.add('show'), 800);
+    }
+
+    loadBest();
+    newGame();
+    </script>
+</body>
+</html>

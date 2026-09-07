@@ -588,8 +588,9 @@ const gamesDatabase = [
         rating: 4.3,
         plays: 7600,
         badge: "new",
-        description: "Encontre tesouros perdidos pelo mundo.",
+        description: "Cave na ilha, siga o detector de proximidade e ache os baús!",
         color: "#84cc16",
+        gameFile: "games/caca-ao-tesouro.html",
         thumbnail: generateTreasureThumb
     },
     {
@@ -652,8 +653,9 @@ const gamesDatabase = [
         rating: 4.5,
         plays: 11900,
         badge: "new",
-        description: "Navegue os mares em busca de tesouros.",
+        description: "Navegue os mares, colete tesouros e afunde navios inimigos!",
         color: "#0891b2",
+        gameFile: "games/aventuras-piratas.html",
         thumbnail: generatePirateThumb
     },
     {
