@@ -717,7 +717,7 @@ const categories = [
 
 // Contar jogos por categoria
 categories.forEach(cat => {
-    cat.count = gamesDatabase.filter(game => game.category === cat.category).length;
+    cat.count = gamesDatabase.filter(game => game.gameFile && game.category === cat.category).length;
 });
 
 // Elementos DOM
@@ -876,7 +876,7 @@ function renderFeaturedGame() {
 
 // Animar Estatísticas
 function animateStats() {
-    animateNumber('totalGames', gamesDatabase.length);
+    animateNumber('totalGames', gamesDatabase.filter(game => game.gameFile).length);
     animateNumber('totalCategories', categories.length);
 }
 
