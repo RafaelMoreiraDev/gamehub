@@ -52,15 +52,15 @@
         });
     }
     const style = document.createElement('style');
-    style.textContent = '.gh-privacy-button{position:fixed;left:12px;bottom:12px;z-index:10000;background:#20243a;color:#fff;border:1px solid #8d98b5;border-radius:8px;padding:10px;font:14px Arial;cursor:pointer}.gh-privacy-panel{position:fixed;z-index:10001;left:12px;bottom:58px;width:min(390px,calc(100vw - 24px));box-sizing:border-box;padding:16px;background:#20243a;color:#fff;border:1px solid #8d98b5;border-radius:12px;box-shadow:0 4px 24px #0009;font:14px/1.5 Arial}.gh-privacy-panel[hidden]{display:none}.gh-privacy-panel p{margin:0 0 12px;color:#fff}.gh-privacy-panel a{color:#8df5e4}.gh-privacy-panel button{min-height:42px;margin:4px 8px 0 0;padding:8px 14px;border:1px solid #fff;border-radius:8px;background:#315d66;color:#fff;font:inherit;cursor:pointer}';
+    style.textContent = '.gh-privacy-button{display:inline-block;color:#4ecdc4;background:none;border:0;padding:10px;font:14px Arial;text-decoration:underline;cursor:pointer}.gh-privacy-panel{position:fixed;z-index:10001;left:0;right:0;bottom:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:16px;padding:16px 24px;background:#20243a;color:#fff;border-top:1px solid #8d98b5;box-shadow:0 -4px 24px #0008;font:14px/1.5 Arial}.gh-privacy-panel[hidden]{display:none}.gh-privacy-panel p{margin:0;max-width:680px;color:#fff}.gh-privacy-panel a{color:#8df5e4}.gh-privacy-actions{display:flex;flex-wrap:wrap;gap:8px}.gh-privacy-panel button{min-height:42px;padding:8px 16px;border:1px solid #b8c4d6;border-radius:8px;background:#315d66;color:#fff;font:inherit;cursor:pointer}@media(max-width:640px){.gh-privacy-panel{align-items:flex-start;flex-direction:column;gap:8px;padding:12px 16px}}';
     document.head.appendChild(style);
     const panel = document.createElement('section');
     panel.className = 'gh-privacy-panel';
-    panel.setAttribute('aria-label', 'Preferências de privacidade');
-    panel.innerHTML = '<p>Podemos usar o Google Analytics para entender visitas e partidas. Sua escolha não impede o acesso aos jogos. <a href="/politica-de-privacidade.html">Política de privacidade</a></p><button type="button" data-choice="accepted">Permitir análise</button><button type="button" data-choice="denied">Recusar análise</button>';
+    panel.setAttribute('aria-label', 'Aviso de cookies');
+    panel.innerHTML = '<p>Usamos cookies de análise para entender como você usa o GameHub. Você pode aceitar ou recusar. <a href="/politica-de-privacidade.html">Saiba mais</a></p><div class="gh-privacy-actions"><button type="button" data-choice="accepted">Aceitar</button><button type="button" data-choice="denied">Recusar</button></div>';
     panel.hidden = consent === 'accepted' || consent === 'denied';
     const toggle = document.createElement('button');
-    toggle.type = 'button'; toggle.className = 'gh-privacy-button'; toggle.textContent = 'Privacidade';
+    toggle.type = 'button'; toggle.className = 'gh-privacy-button'; toggle.textContent = 'Configurações de cookies';
     toggle.setAttribute('aria-expanded', String(!panel.hidden));
     toggle.addEventListener('click', () => { panel.hidden = !panel.hidden; toggle.setAttribute('aria-expanded', String(!panel.hidden)); });
     panel.addEventListener('click', event => {
@@ -74,7 +74,8 @@
         else if (wasLoaded) { window.gtag('consent', 'update', { analytics_storage: 'denied' }); eraseAnalyticsCookies(); location.reload(); }
         else eraseAnalyticsCookies();
     });
-    document.body.append(panel, toggle);
+    document.body.append(panel);
+    (document.querySelector('footer') || document.body).append(toggle);
     startAnalytics();
     document.addEventListener('click', event => {
         const gameLink = event.target.closest('a[href*="games/"]');

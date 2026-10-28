@@ -3,7 +3,7 @@ const source = fs.readFileSync('js/analytics.js','utf8');
 function setup(saved) {
   const storage = new Map(saved ? [['gamehub:analytics-consent', saved]] : []), handlers = {}, nodes = [];
   const createElement = tag => ({tag, dataset:{}, setAttribute(){}, addEventListener(name,cb){this[name]=cb}, appendChild(n){nodes.push(n)}, set innerHTML(v){this.html=v}, get innerHTML(){return this.html}});
-  const document = {head:{appendChild(n){nodes.push(n)}},body:{append(...n){nodes.push(...n)}},createElement,addEventListener(n,cb){handlers[n]=cb},cookie:'',title:'Test'};
+  const document = {querySelector(){return null},head:{appendChild(n){nodes.push(n)}},body:{append(...n){nodes.push(...n)}},createElement,addEventListener(n,cb){handlers[n]=cb},cookie:'',title:'Test'};
   const localStorage = {getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)};
   const location = {pathname:'/games/snake.html',origin:'https://gamehubjogos.com.br',hostname:'gamehubjogos.com.br',protocol:'https:',reload(){this.reloaded=true}};
   const context = {document,localStorage,location,navigator:{},URLSearchParams,Date,Set,console}; context.window=context;
